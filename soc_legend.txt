@@ -1,0 +1,23 @@
+##############
+# SOC LEGEND #
+##############
+
+# effective_object_demonstrated_first
+0 = no
+1 = yes
+
+# feature_appended_to_correct_object
+0 = circle
+1 = diamond
+
+# correct_test_object_location
+0 = left
+1 = right
+
+# test_choice
+0 = not correct
+1 = correct
+
+# memory_check
+0 = not correct
+1 = correct
