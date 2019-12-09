@@ -93,62 +93,17 @@ D = D[,c(9,1:8)]
 # global function  #
 ####################
 ####################
-glmer_global_boot = function(x){ # 'x' is
-  glmer.fit = x                  # e.G., x = glmer(y~x+(1|ID),data=d,family="binomial")
-  
-  glmer.fun = function(fit){
-    return(fixef(fit))
+glm.global.boot = function(x,data){
+  glm.fit = function(data,b,formula){ 
+    d= data[b,]
+    dif.1 =  glm(d[,x]~1, data=data, family = "binomial")
+    return(coef(dif.1))
   }
-  result = bootMer(glmer.fit, glmer.fun, nsim = 4000)
-  return(result)
-} # This function enables users to obtain
-  # the parameters needed to compute the 95% bootstrapped
-  # confidence intervals for the coefficients/predictors
-  # of a generalized linear-mixed effects model
-  # Note that the formula to obtain the 95% Bootstrapped CI is
-  # original + 1.96*(-std.error,std.error)
-
-
-
-lmer_global_boot = function(x){
-  lmer.fit = x              
-  
-  lmer.fun = function(fit){
-    return(fixef(fit))
-  }
-  result = bootMer(lmer.fit, lmer.fun, nsim = 4000)
-  return(result)
-} # This function is identical to the one above
-  # except that it's used to obtain CIs for
-  # linear mixed-effects model
-
-
-glm_global_boot = function(x){ # 'x' is
-  glm.fit = x                  # e.G., x = glmer(y~x+(1|ID),data=d,family="binomial")
-  
-  glm.fun = function(fit){
-    return(fit$coefficients)
-  }
-  result = bootMer(glm.fit, glm.fun, nsim = 4000)
-  return(result)
+  glm.Bootobj = boot(data, glm.fit, R=5000)
+  return(c(exp(glm.Bootobj$t0),exp(glm.Bootobj$t0)  + 1.96*c(-sd(glm.Bootobj$t), 
+                                         sd(glm.Bootobj$t))))
 }
 
-glm.global.boot = function(D,formula){
-  glm.boot = function(formula, D, indices) {
-    d = data[indices,] # allows boot to select sample
-    fit = glm(formula, data=d, family="binomial")
-    return(summary(fit)$coefficients)
-  }
-  
-  results = boot(data=D,statistic=glm.boot, R=1000,formula=formula)
-  return(results)
-}
-
-glm.boot = function(formula, data) {
-  d = data[indices,] # allows boot to select sample
-  fit = glm(formula, data=d, family="binomial")
-  return(summary(fit)$coefficients)
-}
 
 
   
@@ -274,17 +229,21 @@ Anova(glm.fit.2yo)
 
 ## 2-yo data intercept-only model for test_choice & memory_check ##
 
-# participants overall odds of choosing the correc test object
+# participants overall odds of choosing the correct test object
 xtabs(~test_choice, data = D.2yo)
 glm.fit.2yo.intercept.tc = glm(test_choice ~ 1, data=D.2yo, 
                             family = "binomial")
 summary(glm.fit.2yo.intercept.tc)
+exp(glm.fit.2yo.intercept.tc$coefficients)
+glm.global.boot(8,D.2yo) # 95% CI
 
 # participants overall odds of responding correctly on the memory check
 xtabs(~memory_check, data = D.2yo)
 glm.fit.2yo.intercept.mc = glm(memory_check ~ 1, data=D.2yo, 
                             family = "binomial")
 summary(glm.fit.2yo.intercept.mc)
+exp(glm.fit.2yo.intercept.mc$coefficients)
+glm.global.boot(9,D.2yo) # 95% CI
 
 
 ##########################################################
@@ -367,12 +326,15 @@ xtabs(~test_choice, data = D.3yo)
 glm.fit.3yo.intercept.tc = glm(test_choice ~ 1, data=D.3yo, 
                                family = "binomial")
 summary(glm.fit.3yo.intercept.tc)
+glm.global.boot(8,D.3yo) # 95% CI
+
 
 # participants overall odds of responding correctly on the memory check
 xtabs(~memory_check, data = D.3yo)
 glm.fit.3yo.intercept.mc = glm(memory_check ~ 1, data=D.3yo, 
                                family = "binomial")
 summary(glm.fit.3yo.intercept.mc)
+glm.global.boot(9,D.3yo) # 95% CI
 
 
 
@@ -413,7 +375,8 @@ p.3yo.tc+geom_bar(fill=c("#FF9999","black")) + theme_bw() + # remove the gray ba
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) +
   scale_y_continuous(expand = c(0, 0)) + # ensure that bars hit the x-axis
-  coord_cartesian(ylim=c(0, 20))
+  coord_cartesian(ylim=c(0, 20)) +
+  
 
 # memory_check distribution
 p.3yo.mc = ggplot(D.3yo, aes(memory_check)) # THE FIRST ARGUMENT VALUES AFTER 'AES' CORRESPONDS
