@@ -106,9 +106,6 @@ glm.global.boot = function(x,data){
 
 
 
-  
-
-
 #####################################
 # preliminary analyses and plotting #
 #####################################
@@ -213,6 +210,89 @@ glm.fit = glm(test_choice~1, data=D, family="binomial")
 summary(glm.fit)
 
 
+###################
+# global analysis #
+###################
+# subset data into memory-check(correct) and memory_check(incorrect) dataframes
+D.mcc = subset(D, ! memory_check %in% c("Incorrect"))
+D.mci = subset(D, ! memory_check %in% c("Correct"))
+
+names(D)
+main.glm.fit = glm(test_choice~(age+memory_check)^2, data=D, family="binomial")
+summary(main.glm.fit)
+Anova(main.glm.fit)
+
+
+# follow-up comparisons to examine the marginally significant interaction: 2-year-olds #
+# comparing odds of success between 2-year-olds who passed memory check and those who did not #
+main.glm.fit.2yo = glm(test_choice~memory_check, data=D.2yo, family="binomial")
+summary(main.glm.fit.2yo)
+Anova(main.glm.fit.2yo)
+exp(main.glm.fit.2yo$coefficients)
+glm.global.boot(8,D.2yo) # 95% C
+
+p.2yo = ggplot(D.2yo, aes(test_choice, fill = test_choice)) # THE FIRST ARGUMENT VALUES AFTER 'AES' CORRESPONDS
+p.2yo+geom_bar() + theme_bw() + # remove the gray background
+  facet_wrap(~memory_check) +
+  scale_fill_manual(values= c("#FF9999","black")) +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) +
+  scale_y_continuous(expand = c(0, 0)) + # ensure that bars hit the x-axis
+  coord_cartesian(ylim=c(0, 20))
+
+
+# follow-up comparisons to examine the marginally significant interaction: 3-year-olds #
+# comparing odds of success between 2-year-olds who passed memory check and those who did not #
+main.glm.fit.3yo = glm(test_choice~memory_check, data=D.3yo, family="binomial")
+summary(main.glm.fit.3yo)
+Anova(main.glm.fit.3yo)
+
+
+p.3yo = ggplot(D.3yo, aes(test_choice, fill = test_choice)) # THE FIRST ARGUMENT VALUES AFTER 'AES' CORRESPONDS
+p.3yo+geom_bar() + theme_bw() + # remove the gray background
+  facet_wrap(~memory_check) +
+  scale_fill_manual(values= c("#FF9999","black")) +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) +
+  scale_y_continuous(expand = c(0, 0)) + # ensure that bars hit the x-axis
+  coord_cartesian(ylim=c(0, 20))
+
+
+
+# follow-up comparisons to examine the marginally significant interaction: 2-year-olds #
+# comparing odds of success differed between 2- and 3-year-olds  #
+
+# 2 vs 3 who PASSED memory check on log odds of choosing the correct test object
+main.glm.fit.age.comparison.mmc = glm(test_choice~age, data=D.mcc, family = "binomial")
+summary(main.glm.fit.age.comparison.mmc)
+Anova(main.glm.fit.age.comparison.mmc)
+
+
+p.mcc = ggplot(D.mcc, aes(age, fill = age)) # THE FIRST ARGUMENT VALUES AFTER 'AES' CORRESPONDS
+p.mcc+geom_bar() + theme_bw() + # remove the gray background
+  facet_wrap(~test_choice) +
+  scale_fill_manual(values= c("#FF9999","black")) +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) +
+  scale_y_continuous(expand = c(0, 0)) + # ensure that bars hit the x-axis
+  coord_cartesian(ylim=c(0, 20))
+
+
+
+# 2 vs 3 who FAILED memory check on log odds of choosing the correct test object
+main.glm.fit.age.comparison.mmi = glm(test_choice~age, data=D.mci, family = "binomial")
+summary(main.glm.fit.age.comparison.mmi)
+Anova(main.glm.fit.age.comparison.mmi)
+
+
+p.mci = ggplot(D.mci, aes(age, fill = age)) # THE FIRST ARGUMENT VALUES AFTER 'AES' CORRESPONDS
+p.mci+geom_bar() + theme_bw() + # remove the gray background
+  facet_wrap(~test_choice) +
+  scale_fill_manual(values= c("#FF9999","black")) +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) +
+  scale_y_continuous(expand = c(0, 0)) + # ensure that bars hit the x-axis
+  coord_cartesian(ylim=c(0, 20))
 
 #######################
 # 2-year-old analyses #
@@ -223,13 +303,15 @@ glm.fit.2yo = glm(test_choice~sex+condition+effective_object_demonstrated_first+
                   data=D.2yo, family="binomial",
                   na.action = na.omit)
 
+
 summary(glm.fit.2yo)
 Anova(glm.fit.2yo)
 
 
 ## 2-yo data intercept-only model for test_choice & memory_check ##
 
-# participants overall odds of choosing the correct test object
+# participants overall odds of choosing the correct test object,
+# where test_object is the DV
 xtabs(~test_choice, data = D.2yo)
 glm.fit.2yo.intercept.tc = glm(test_choice ~ 1, data=D.2yo, 
                             family = "binomial")
@@ -237,7 +319,10 @@ summary(glm.fit.2yo.intercept.tc)
 exp(glm.fit.2yo.intercept.tc$coefficients)
 glm.global.boot(8,D.2yo) # 95% CI
 
-# participants overall odds of responding correctly on the memory check
+
+
+# participants overall odds of responding correctly on the memory_check, 
+# where memory_check is the DV
 xtabs(~memory_check, data = D.2yo)
 glm.fit.2yo.intercept.mc = glm(memory_check ~ 1, data=D.2yo, 
                             family = "binomial")
