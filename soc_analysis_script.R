@@ -35,10 +35,6 @@ D = read.csv(file.choose(), header = TRUE)
 # get dimension of D
 dim(D)
 
-# subset D with appropriate rows
-D = D[1:48,]
-
-
 # get structure of the D
 str(D)
 
@@ -80,10 +76,6 @@ D.3yo = subset(D, ! age %in% c("2")) # This creates a subsetted dataframe
 D.3yo = subset(D.3yo, ! memory_check %in% c("Incorrect"))
 
 
-# remove original ID column and replace it with a cleaner version
-D$ID = NULL
-D$ID = c(1:48)
-
 # reorder columns
 D = D[,c(9,1:8)]
 
@@ -109,7 +101,6 @@ glm.global.boot = function(x,data){
 #####################################
 # preliminary analyses and plotting #
 #####################################
-
 # get distribution of successes and failure 
 table(D$test_choice)
 
@@ -210,35 +201,13 @@ glm.fit = glm(test_choice~1, data=D, family="binomial")
 summary(glm.fit)
 
 
-###################
-# global analysis #
-###################
-# subset data into memory-check(correct) and memory_check(incorrect) dataframes
-D.mcc = subset(D, ! memory_check %in% c("Incorrect"))
-D.mci = subset(D, ! memory_check %in% c("Correct"))
-
+###############################
+# global analysis#
+###############################
 names(D)
 main.glm.fit = glm(test_choice~(age+memory_check)^2, data=D, family="binomial")
 summary(main.glm.fit)
 Anova(main.glm.fit)
-
-
-# follow-up comparisons to examine the marginally significant interaction: 2-year-olds #
-# comparing odds of success between 2-year-olds who passed memory check and those who did not #
-main.glm.fit.2yo = glm(test_choice~memory_check, data=D.2yo, family="binomial")
-summary(main.glm.fit.2yo)
-Anova(main.glm.fit.2yo)
-exp(main.glm.fit.2yo$coefficients)
-glm.global.boot(8,D.2yo) # 95% C
-
-p.2yo = ggplot(D.2yo, aes(test_choice, fill = test_choice)) # THE FIRST ARGUMENT VALUES AFTER 'AES' CORRESPONDS
-p.2yo+geom_bar() + theme_bw() + # remove the gray background
-  facet_wrap(~memory_check) +
-  scale_fill_manual(values= c("#FF9999","black")) +
-  theme(panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) +
-  scale_y_continuous(expand = c(0, 0)) + # ensure that bars hit the x-axis
-  coord_cartesian(ylim=c(0, 20))
 
 
 # follow-up comparisons to examine the marginally significant interaction: 3-year-olds #
@@ -302,33 +271,62 @@ glm.fit.2yo = glm(test_choice~sex+condition+effective_object_demonstrated_first+
                     feature_appended_to_correct_object+correct_test_object_location,
                   data=D.2yo, family="binomial",
                   na.action = na.omit)
-
-
 summary(glm.fit.2yo)
 Anova(glm.fit.2yo)
 
 
-## 2-yo data intercept-only model for test_choice & memory_check ##
-
-# participants overall odds of choosing the correct test object,
-# where test_object is the DV
-xtabs(~test_choice, data = D.2yo)
-glm.fit.2yo.intercept.tc = glm(test_choice ~ 1, data=D.2yo, 
-                            family = "binomial")
-summary(glm.fit.2yo.intercept.tc)
-exp(glm.fit.2yo.intercept.tc$coefficients)
-glm.global.boot(8,D.2yo) # 95% CI
+main.glm.fit.2yo = glm(test_choice~memory_check, data=D.2yo, family="binomial")
+summary(main.glm.fit.2yo)
+Anova(main.glm.fit.2yo)
+exp(main.glm.fit.2yo$coefficients)
+glm.global.boot(8,D.2yo) # 95% C
 
 
-
+##################################
+# follow-up analysis: 2-year-old #
+##################################
 # participants overall odds of responding correctly on the memory_check, 
 # where memory_check is the DV
 xtabs(~memory_check, data = D.2yo)
-glm.fit.2yo.intercept.mc = glm(memory_check ~ 1, data=D.2yo, 
-                            family = "binomial")
-summary(glm.fit.2yo.intercept.mc)
-exp(glm.fit.2yo.intercept.mc$coefficients)
-glm.global.boot(9,D.2yo) # 95% CI
+glm.2yo.intercept.mem.odds = glm(memory_check ~ 1, data=D.2yo, 
+                               family = "binomial")
+summary(glm.2yo.intercept.mem.odds)
+exp(glm.2yo.intercept.mem.odds$coefficients)
+glm.global.boot(1,D.2yo) # 95% CI
+
+p.2yo = ggplot(D.2yo, aes(memory_check, fill = memory_check)) # THE FIRST ARGUMENT VALUES AFTER 'AES' CORRESPONDS
+p.2yo+geom_bar() + theme_bw() + # remove the gray background
+  scale_fill_manual(values= c("#FF9999","black")) +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) +
+  scale_y_continuous(expand = c(0, 0)) + # ensure that bars hit the x-axis
+  coord_cartesian(ylim=c(0, 20))
+
+
+# follow-up comparisons to examine the marginally significant interaction: 2-year-olds #
+# comparing odds of success between 2-year-olds who passed memory check and those who did not #
+D.2yo.mcc = subset(D.2yo, ! memory_check %in% c("Incorrect"))
+D.2yo.mci = subset(D.2yo, ! memory_check %in% c("Correct"))
+dim(D.2yo.mcc)
+dim(D.2yo.mci)
+
+# model for 2-yo-mci
+D.2yo.mci.glm.fit = glm(test_choice ~ 1, data=D.2yo.mci, 
+                        family = "binomial")
+summary(D.2yo.mci.glm.fit)
+glm.global.boot(9,D.2yo.mci)
+
+
+# model for 2-yo mcc
+D.2yo.mcc.glm.fit = glm(test_choice ~ 1, data=D.2yo.mcc, 
+                        family = "binomial")
+summary(D.2yo.mcc.glm.fit)
+glm.global.boot(9,D.2yo.mcc)
+
+
+# subset data into memory-check(correct) and memory_check(incorrect) dataframes #
+D.mcc = subset(D, ! memory_check %in% c("Incorrect"))
+D.mci = subset(D, ! memory_check %in% c("Correct"))
 
 
 ##########################################################
@@ -421,6 +419,18 @@ glm.fit.3yo.intercept.mc = glm(memory_check ~ 1, data=D.3yo,
 summary(glm.fit.3yo.intercept.mc)
 glm.global.boot(9,D.3yo) # 95% CI
 
+
+## 3-year-old memory check subset analyses ##
+# subset data into memory-check(correct) and memory_check(incorrect) dataframes
+D.3yo.mcc = subset(D.3yo, ! memory_check %in% c("Incorrect"))
+D.3yo.mci = subset(D.3yo, ! memory_check %in% c("Correct"))
+
+# participants overall odds of choosing the correc test object
+xtabs(~test_choice, data = D.3yo)
+glm.fit.3yo.mcc = glm(test_choice ~ 1, data=D.3yo.mcc, 
+                               family = "binomial")
+summary(glm.fit.3yo.mcc)
+glm.global.boot(8,D.3yo.mcc)
 
 
 ##########################################################
