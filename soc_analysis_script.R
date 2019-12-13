@@ -409,7 +409,7 @@ xtabs(~test_choice, data = D.3yo)
 glm.fit.3yo.mcc = glm(test_choice ~ 1, data=D.3yo.mcc, 
                                family = "binomial")
 summary(glm.fit.3yo.mcc)
-glm.global.boot(9,D.3yo.mcc)
+glm.global.boot(8,D.3yo.mcc)
 
 
 # omnibus 3-yo memory-check figure
