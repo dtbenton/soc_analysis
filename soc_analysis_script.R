@@ -197,6 +197,8 @@ anova(icc_mod1_3yo,null_model)
 # memory_check
 
 # no data-subsetted, intercept-only model
+# this analysis examines the overall log odds of choosing
+# the correct object averaged over all variables
 glm.fit = glm(test_choice~1, data=D, family="binomial")
 summary(glm.fit)
 
@@ -210,59 +212,6 @@ summary(main.glm.fit)
 Anova(main.glm.fit)
 
 
-# follow-up comparisons to examine the marginally significant interaction: 3-year-olds #
-# comparing odds of success between 2-year-olds who passed memory check and those who did not #
-main.glm.fit.3yo = glm(test_choice~memory_check, data=D.3yo, family="binomial")
-summary(main.glm.fit.3yo)
-Anova(main.glm.fit.3yo)
-
-
-p.3yo = ggplot(D.3yo, aes(test_choice, fill = test_choice)) # THE FIRST ARGUMENT VALUES AFTER 'AES' CORRESPONDS
-p.3yo+geom_bar() + theme_bw() + # remove the gray background
-  facet_wrap(~memory_check) +
-  scale_fill_manual(values= c("#FF9999","black")) +
-  theme(panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) +
-  scale_y_continuous(expand = c(0, 0)) + # ensure that bars hit the x-axis
-  coord_cartesian(ylim=c(0, 20))
-
-
-
-# follow-up comparisons to examine the marginally significant interaction: 2-year-olds #
-# comparing odds of success differed between 2- and 3-year-olds  #
-
-# 2 vs 3 who PASSED memory check on log odds of choosing the correct test object
-main.glm.fit.age.comparison.mmc = glm(test_choice~age, data=D.mcc, family = "binomial")
-summary(main.glm.fit.age.comparison.mmc)
-Anova(main.glm.fit.age.comparison.mmc)
-
-
-p.mcc = ggplot(D.mcc, aes(age, fill = age)) # THE FIRST ARGUMENT VALUES AFTER 'AES' CORRESPONDS
-p.mcc+geom_bar() + theme_bw() + # remove the gray background
-  facet_wrap(~test_choice) +
-  scale_fill_manual(values= c("#FF9999","black")) +
-  theme(panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) +
-  scale_y_continuous(expand = c(0, 0)) + # ensure that bars hit the x-axis
-  coord_cartesian(ylim=c(0, 20))
-
-
-
-# 2 vs 3 who FAILED memory check on log odds of choosing the correct test object
-main.glm.fit.age.comparison.mmi = glm(test_choice~age, data=D.mci, family = "binomial")
-summary(main.glm.fit.age.comparison.mmi)
-Anova(main.glm.fit.age.comparison.mmi)
-
-
-p.mci = ggplot(D.mci, aes(age, fill = age)) # THE FIRST ARGUMENT VALUES AFTER 'AES' CORRESPONDS
-p.mci+geom_bar() + theme_bw() + # remove the gray background
-  facet_wrap(~test_choice) +
-  scale_fill_manual(values= c("#FF9999","black")) +
-  theme(panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) +
-  scale_y_continuous(expand = c(0, 0)) + # ensure that bars hit the x-axis
-  coord_cartesian(ylim=c(0, 20))
-
 #######################
 # 2-year-old analyses #
 #######################
@@ -274,13 +223,20 @@ glm.fit.2yo = glm(test_choice~sex+condition+effective_object_demonstrated_first+
 summary(glm.fit.2yo)
 Anova(glm.fit.2yo)
 
-
-main.glm.fit.2yo = glm(test_choice~memory_check, data=D.2yo, family="binomial")
+xtabs(~test_choice, data = D.2yo)
+main.glm.fit.2yo = glm(test_choice~1, data=D.2yo, family="binomial")
 summary(main.glm.fit.2yo)
-Anova(main.glm.fit.2yo)
-exp(main.glm.fit.2yo$coefficients)
 glm.global.boot(8,D.2yo) # 95% C
 
+
+# omnibus 2-yo figure
+p.2yo.tc = ggplot(D.2yo, aes(test_choice, fill = test_choice)) # THE FIRST ARGUMENT VALUES AFTER 'AES' CORRESPONDS
+p.2yo.tc+geom_bar() + theme_bw() + # remove the gray background
+  scale_fill_manual(values= c("#FF9999","black")) +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) +
+  scale_y_continuous(expand = c(0, 0)) + # ensure that bars hit the x-axis
+  coord_cartesian(ylim=c(0, 20))
 
 ##################################
 # follow-up analysis: 2-year-old #
@@ -292,15 +248,18 @@ glm.2yo.intercept.mem.odds = glm(memory_check ~ 1, data=D.2yo,
                                family = "binomial")
 summary(glm.2yo.intercept.mem.odds)
 exp(glm.2yo.intercept.mem.odds$coefficients)
-glm.global.boot(1,D.2yo) # 95% CI
+glm.global.boot(9,D.2yo) # 95% CI
 
-p.2yo = ggplot(D.2yo, aes(memory_check, fill = memory_check)) # THE FIRST ARGUMENT VALUES AFTER 'AES' CORRESPONDS
+
+xtabs(~test_choice+memory_check,data=D.2yo)
+p.2yo = ggplot(D.2yo, aes(test_choice, fill = test_choice)) # THE FIRST ARGUMENT VALUES AFTER 'AES' CORRESPONDS
 p.2yo+geom_bar() + theme_bw() + # remove the gray background
+  facet_wrap(~memory_check) +
   scale_fill_manual(values= c("#FF9999","black")) +
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) +
   scale_y_continuous(expand = c(0, 0)) + # ensure that bars hit the x-axis
-  coord_cartesian(ylim=c(0, 20))
+  coord_cartesian(ylim=c(0, 12))
 
 
 # follow-up comparisons to examine the marginally significant interaction: 2-year-olds #
@@ -314,14 +273,14 @@ dim(D.2yo.mci)
 D.2yo.mci.glm.fit = glm(test_choice ~ 1, data=D.2yo.mci, 
                         family = "binomial")
 summary(D.2yo.mci.glm.fit)
-glm.global.boot(9,D.2yo.mci)
+glm.global.boot(8,D.2yo.mci)
 
 
 # model for 2-yo mcc
 D.2yo.mcc.glm.fit = glm(test_choice ~ 1, data=D.2yo.mcc, 
                         family = "binomial")
 summary(D.2yo.mcc.glm.fit)
-glm.global.boot(9,D.2yo.mcc)
+glm.global.boot(8,D.2yo.mcc)
 
 
 # subset data into memory-check(correct) and memory_check(incorrect) dataframes #
@@ -402,14 +361,22 @@ glm.fit.3yo = glm(test_choice~condition+effective_object_demonstrated_first+
 summary(glm.fit.3yo)
 Anova(glm.fit.3yo)
 
-## 3-yo data intercept-only model for test_choice & memory_check ##
-
-# participants overall odds of choosing the correc test object
 xtabs(~test_choice, data = D.3yo)
 glm.fit.3yo.intercept.tc = glm(test_choice ~ 1, data=D.3yo, 
                                family = "binomial")
 summary(glm.fit.3yo.intercept.tc)
 glm.global.boot(8,D.3yo) # 95% CI
+
+# omnibus 3-yo figure
+p.3yo.tc = ggplot(D.3yo, aes(test_choice, fill = test_choice)) # THE FIRST ARGUMENT VALUES AFTER 'AES' CORRESPONDS
+p.3yo.tc+geom_bar() + theme_bw() + # remove the gray background
+  scale_fill_manual(values= c("#FF9999","black")) +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) +
+  scale_y_continuous(expand = c(0, 0)) + # ensure that bars hit the x-axis
+  coord_cartesian(ylim=c(0, 20))
+
+
 
 
 # participants overall odds of responding correctly on the memory check
@@ -420,10 +387,22 @@ summary(glm.fit.3yo.intercept.mc)
 glm.global.boot(9,D.3yo) # 95% CI
 
 
+# omnibus 3-yo memory-check figure
+p.3yo.mc = ggplot(D.3yo, aes(memory_check)) # THE FIRST ARGUMENT VALUES AFTER 'AES' CORRESPONDS
+p.3yo.mc+geom_bar(fill=c("#FF9999","black")) + theme_bw() + # remove the gray background
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) +
+  scale_y_continuous(expand = c(0, 0)) + # ensure that bars hit the x-axis
+  coord_cartesian(ylim=c(0, 25))
+
+
+
 ## 3-year-old memory check subset analyses ##
 # subset data into memory-check(correct) and memory_check(incorrect) dataframes
 D.3yo.mcc = subset(D.3yo, ! memory_check %in% c("Incorrect"))
 D.3yo.mci = subset(D.3yo, ! memory_check %in% c("Correct"))
+dim(D.3yo.mcc)
+dim(D.3yo.mci)
 
 # participants overall odds of choosing the correc test object
 xtabs(~test_choice, data = D.3yo)
@@ -431,6 +410,16 @@ glm.fit.3yo.mcc = glm(test_choice ~ 1, data=D.3yo.mcc,
                                family = "binomial")
 summary(glm.fit.3yo.mcc)
 glm.global.boot(8,D.3yo.mcc)
+
+
+# omnibus 3-yo memory-check figure
+xtabs(~test_choice, data = D.3yo.mcc)
+p.3yo.mc = ggplot(D.3yo.mcc, aes(test_choice)) # THE FIRST ARGUMENT VALUES AFTER 'AES' CORRESPONDS
+p.3yo.mc+geom_bar(fill=c("#FF9999","black")) + theme_bw() + # remove the gray background
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) +
+  scale_y_continuous(expand = c(0, 0)) + # ensure that bars hit the x-axis
+  coord_cartesian(ylim=c(0, 18))
 
 
 ##########################################################
