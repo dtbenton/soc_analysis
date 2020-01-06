@@ -365,7 +365,7 @@ xtabs(~test_choice, data = D.3yo)
 glm.fit.3yo.intercept.tc = glm(test_choice ~ 1, data=D.3yo, 
                                family = "binomial")
 summary(glm.fit.3yo.intercept.tc)
-glm.global.boot(8,D.3yo) # 95% CI
+glm.global.boot(9,D.3yo) # 95% CI
 
 # omnibus 3-yo figure
 p.3yo.tc = ggplot(D.3yo, aes(test_choice, fill = test_choice)) # THE FIRST ARGUMENT VALUES AFTER 'AES' CORRESPONDS
@@ -374,7 +374,7 @@ p.3yo.tc+geom_bar() + theme_bw() + # remove the gray background
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) +
   scale_y_continuous(expand = c(0, 0)) + # ensure that bars hit the x-axis
-  coord_cartesian(ylim=c(0, 20))
+  coord_cartesian(ylim=c(0, 25))
 
 
 
@@ -410,7 +410,7 @@ glm.fit.3yo.mcc = glm(test_choice ~ 1, data=D.3yo.mcc,
                                family = "binomial")
 summary(glm.fit.3yo.mcc)
 glm.global.boot(8,D.3yo.mcc)
-
+bf.3yo = proportionBF(21, 11+21, p = .5) 
 
 # omnibus 3-yo memory-check figure
 xtabs(~test_choice, data = D.3yo.mcc)
