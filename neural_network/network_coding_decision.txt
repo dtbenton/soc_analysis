@@ -1,0 +1,7 @@
+###################################
+# NEURAL NETWORK CODING DECISIONS #
+###################################
+
+# Network's response will be coded as "1," which corresponds to correct performance, if the output activation of the "activity" unit is above .5 for the consistent event AND below .5 for the inconsistent event.
+
+# A network's response will coded as "0," which corresponds to incorrect performance, if the output activation of the "activity" unit is above .5 for the inconsistent test event AND below .5 for the consistent event. Likewise, 0 will be used if the network's response to both events is either BOTH above .5 or BOTH below .5.
