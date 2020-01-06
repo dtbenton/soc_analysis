@@ -21,3 +21,7 @@
 # memory_check
 0 = not correct
 1 = correct
+
+# age
+0 = 2-year-olds
+1 = 3-year-olds
