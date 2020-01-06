@@ -12,7 +12,7 @@ T:
 (ColorOUT)      
  0 0 1
 (FeatureOUT)    
- 1 0
+ 0 1
 (ActivityOUT)  
  1
 ;
@@ -30,7 +30,7 @@ T:
 (ColorOUT)      
  0 0 1
 (FeatureOUT)    
- 0 1
+ 1 0
 (ActivityOUT)  
  1
 ;

@@ -595,7 +595,7 @@ cat(paste("(ColorOUT)", sep="\t"))
 print(color[3,1], sep = "\t", quote = FALSE, row.names = FALSE)
 
 cat(paste("(FeatureOUT)", sep="\t"))
-print(feature[1,1], sep = "\t", quote = FALSE, row.names = FALSE)
+print(feature[2,1], sep = "\t", quote = FALSE, row.names = FALSE)
 
 cat(paste("(ActivityOUT)", sep="\t"))
 print(activity[2,1], sep = "\t", quote = FALSE, row.names = FALSE)
@@ -627,7 +627,7 @@ cat(paste("(ColorOUT)", sep="\t"))
 print(color[3,1], sep = "\t", quote = FALSE, row.names = FALSE)
 
 cat(paste("(FeatureOUT)", sep="\t"))
-print(feature[2,1], sep = "\t", quote = FALSE, row.names = FALSE)
+print(feature[1,1], sep = "\t", quote = FALSE, row.names = FALSE)
 
 cat(paste("(ActivityOUT)", sep="\t"))
 print(activity[2,1], sep = "\t", quote = FALSE, row.names = FALSE)
