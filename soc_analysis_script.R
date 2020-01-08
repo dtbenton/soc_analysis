@@ -34,7 +34,6 @@ D = read.csv(file.choose(), header = TRUE)
 
 # get dimension of D
 dim(D)
-D = D[1:63,]
 
 
 # convert relevant numerics to factors
@@ -319,8 +318,8 @@ glm.fit.3yo.intercept.tc = glm(test_choice ~ 1, data=D.3yo,
 summary(glm.fit.3yo.intercept.tc)
 set.seed(2020)
 glm.global.boot(9,D.3yo) # 95% CI
-bf.3yo.intercept = proportionBF(22,22+9,p=0.5) # this analysis indicates that 
-                                               # that there was overwhelming evidence
+bf.3yo.intercept = proportionBF(23,23+9,p=0.5) # this analysis indicates that 
+bf.3yo.intercept                                               # that there was overwhelming evidence
                                                # in favor of the alternative hypothesis
                                                # that 3-year-olds were more likely to choose
                                                # the correct test object.
