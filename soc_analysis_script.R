@@ -7,7 +7,7 @@
 ########################################################
 ########################################################
 ########################################################
-# load all relevant libraries:
+# LOAD ALL RELEVANT LIBRARIES:
 library(lme4)
 library(nlme)
 library(boot)
@@ -24,7 +24,9 @@ library(BayesFactor)
 library(foreign)
 library(dplyr)
 library(lattice)
+library(openxlsx)
 options(scipen=9999)
+
 
 ######################
 # data preprocessing #
@@ -159,23 +161,21 @@ p.3y+geom_bar()
 ##########################################################################
 # preliminary analysis to determine whether random effects are necessary #
 ##########################################################################
+# the analyses below establish whether a random intercept is needed
 mod1 = glmer(test_choice ~ 1 + (1|ID), data=D, family = "binomial")
 summary(mod1) # SUMMARY OF MODEL 1
 icc_mod1 = mod1@theta[1]^2/ (mod1@theta[1]^2 + (3.14159^2/3)) # ICC of mod1
+icc_mod1
 
 mod1_2yo = glmer(test_choice ~ 1 + (1|ID), data=D.2yo, family = "binomial")
 summary(mod1_2yo) # SUMMARY OF MODEL 1
 icc_mod1_2yo = mod1_2yo@theta[1]^2/ (mod1_2yo@theta[1]^2 + (3.14159^2/3)) # ICC of mod1
+icc_mod1_2yo
 
 mod1_3yo = glmer(test_choice ~ 1 + (1|ID), data=D.3yo, family = "binomial")
 summary(mod1_3yo) # SUMMARY OF MODEL 1
 icc_mod1_3yo = mod1_3yo@theta[1]^2/ (mod1_3yo@theta[1]^2 + (3.14159^2/3)) # ICC of mod1
-
-# determine whether inclusion of the subject-level random effect leads to a better model
-null_model = glm(test_choice ~ 1, data=D, family = "binomial")
-anova(icc_mod1,null_model)
-anova(icc_mod1_2yo,null_model)
-anova(icc_mod1_3yo,null_model)
+icc_mod1_3yo
 
 # summary #
 # The above analysis indicate that the inclusion of a random-effect intercept for subjects
@@ -199,20 +199,47 @@ anova(icc_mod1_3yo,null_model)
 # test_choice
 # memory_check
 
+
+###########
+# METHODS #
+###########
+
+# number of 2-year-olds,
+# age range, mean age,
+# and distribution of males 
+# and females
+nrow(D.2yo)
+range(D.2yo$age)*12
+mean(D.2yo$age)*12
+table(D.2yo$sex)
+
+# number of 3-year-olds,
+# age range, mean age,
+# and distribution of males 
+# and females
+nrow(D.3yo)
+range(D.3yo$age)*12
+mean(D.3yo$age)*12
+table(D.3yo$sex)
+
+
+
+
+
+###########
+# RESULTS #
+###########
+names(D)
+main.glm.fit = glm(test_choice~(age_cat+memory_check)^2, data=D, family="binomial")
+summary(main.glm.fit)
+Anova(main.glm.fit)
+
 # no data-subsetted, intercept-only model
 # this analysis examines the overall log odds of choosing
 # the correct object averaged over all variables
 glm.fit = glm(test_choice~1, data=D, family="binomial")
 summary(glm.fit)
 
-
-###############################
-# global analysis#
-###############################
-names(D)
-main.glm.fit = glm(test_choice~(age_cat+memory_check)^2, data=D, family="binomial")
-summary(main.glm.fit)
-Anova(main.glm.fit)
 
 
 #####################################
