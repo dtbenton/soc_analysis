@@ -92,10 +92,10 @@ glm.global.boot = function(x,data){
                                          sd(glm.Bootobj$t))))
 }
 
-glm.global.boot_modified = function(x,z,data){
+glm.global.boot_modified = function(x,y,data){
   glm.fit = function(data,b,formula){ 
     d= data[b,]
-    dif.1 =  glm(d[,x]~z, data=data, family = "binomial")
+    dif.1 =  glm(d[,x]~d[,y], data=data, family = "binomial")
     return(coef(dif.1))
   }
   glm.Bootobj = boot(data, glm.fit, R=5000)
@@ -240,37 +240,128 @@ Anova(main.glm.fit)
 glm.fit = glm(test_choice~1, data=D, family="binomial")
 summary(glm.fit)
 
+###########################
+# MEMORY CHECK COMPARISON #
+###########################
+#  examining whether the sexes differed in their odds
+# of passing the memory check
+sex_mc_comparisons = glm(memory_check~sex,
+                                  data=D, family="binomial",
+                                  na.action = na.omit)
+summary(sex_mc_comparisons)
+Anova(sex_mc_comparisons)
+
+# intial analysis to examine whether 2- and 3-year-olds
+# differed in their odds of passing the memory check question.
+mem_check_age_comp = glm(memory_check~age_cat, data = D, 
+                         family = "binomial",
+                         na.action = na.omit)
+summary(mem_check_age_comp)
+
+# 2- vs. 3-year-old MC comparisons #
+# ORs
+mem_check_age_comp_ORs = exp(coefficients(mem_check_age_comp))
+mem_check_age_comp_ORs
+
+# 95% CI
+mem_check_age_comp_boot = glm.global.boot(x=10,y=3,D)
+mem_check_age_comp_boot
+
+# BF
+mem_check_age_comp_conting_tab = xtabs(~ age_cat + memory_check, data = D)
+mem_check_age_comp_conting_tab
+
+mem_check_age_comp_BF = contingencyTableBF(mem_check_age_comp_conting_tab,
+                                           sampleType = "indepMulti",
+                                           fixedMargin = "cols")
+mem_check_age_comp_BF
+
+
+# 2-year-old MC analysis #  
+
+# two-year-olds overall odds of passing memory check
+mem_check_two_year_olds = glm(memory_check~1, data = D.2yo, 
+                         family = "binomial",
+                         na.action = na.omit)
+summary(mem_check_two_year_olds)
+
+
+# 3-year-old MC analysis #  
+
+# three-year-olds overall odds of passing memory check
+mem_check_three_year_olds = glm(memory_check~1, data = D.3yo, 
+                              family = "binomial",
+                              na.action = na.omit)
+summary(mem_check_three_year_olds)
+
+
+# ORS 
+mem_check_threes_ORs = exp(coefficients(mem_check_three_year_olds))
+mem_check_threes_ORs
+
+# 95% CI
+mem_check_threes_boot = glm.global.boot(x=10,D.3yo)
+mem_check_threes_boot
+
+mem_check_threes_boot_2 = exp(confint(mem_check_three_year_olds, method="Wald"))
+mem_check_threes_boot_2
+
+# BF
+mem_check_threes_BF = proportionBF(30,32,p=0.5)
+mem_check_threes_BF
+
+
+####################################
+# MAIN ANALYSES COMPARING 2S TO 3S #
+####################################
+main_analysis_comparison = glm(test_choice~age_cat,
+                               data=D, family="binomial",
+                               na.action = na.omit)
+summary(main_analysis_comparison)
+
+# ORs 
+main_analysis_ORs = exp(coefficients(main_analysis_comparison))
+main_analysis_ORs
+
+
+# 95% CIs
+main_analysis_CIs = glm.global.boot_modified(9, 3, D)
+main_analysis_CIs
+
+# BF
+main_analysis_conting_tab = xtabs(~ age_cat + test_choice, data = D)
+main_analysis_conting_tab
+
+main_analysis_conting_BF = contingencyTableBF(main_analysis_conting_tab,
+                                           sampleType = "indepMulti",
+                                           fixedMargin = "cols")
+main_analysis_conting_BF
 
 
 #####################################
 # 2-year-old analyses: test choices #
 #####################################
-## 2-yo data full model ##
-glm.fit.2yo = glm(test_choice~sex+condition+correct_test_object_location,
-                  data=D.2yo, family="binomial",
-                  na.action = na.omit)
-summary(glm.fit.2yo)
-Anova(glm.fit.2yo)
-bf.2yo.sex = proportionBF(21, 11+21, p = .5) 
-xtabs(~test_choice, data = D.2yo)
+# main analysis
 main.glm.fit.2yo = glm(test_choice~1, data=D.2yo, family="binomial")
 summary(main.glm.fit.2yo)
 
-set.seed(2020)
-glm.global.boot(8,D.2yo) # 95% C
+# ORs 
+main_analysis_twos_ORs = exp(coefficients(main.glm.fit.2yo))
+main_analysis_twos_ORs
 
-two.yo.sex.conting = xtabs(~test_choice+sex,data=D.2yo)
-bf.2yo.sex = contingencyTableBF(two.yo.sex.conting,
-                                sampleType = "indepMulti", 
-                                fixedMargin = "cols") # this analysis is to explore the marginally
-                                                      # significant effect of sex for the 2-year-olds.
-                                                      # This analysis indicated that male and females did
-                                                      # did not differ in their test choices.
-set.seed(2020)
-glm.global.boot_modified(9,D.2yo$sex,D.2yo) # this is supplementary to further show that there was no difference
-                                            # between the male and female infants given that the confidence interval
-                                            # contains 1. 
+# 95% CI
+main_analysis_twos_boot = glm.global.boot(x=9,D.2yo)
+main_analysis_twos_boot
 
+# BF
+main_analysis_twos_BF = proportionBF(13,32,p=0.5)
+main_analysis_twos_BF
+
+
+
+#############################
+# 2-year-old omnibus figure #
+#############################
 
 # omnibus 2-yo figure
 p.2yo.tc = ggplot(D.2yo, aes(test_choice, fill = test_choice)) # THE FIRST ARGUMENT VALUES AFTER 'AES' CORRESPONDS
@@ -281,31 +372,6 @@ p.2yo.tc+geom_bar() + theme_bw() + # remove the gray background
   scale_y_continuous(expand = c(0, 0)) + # ensure that bars hit the x-axis
   coord_cartesian(ylim=c(0, 20))
 
-
-
-#####################################
-# 2-year-old analyses: memory check #
-#####################################
-# participants overall odds of responding correctly on the memory_check, 
-# where memory_check is the DV
-xtabs(~memory_check, data = D.2yo)
-glm.2yo.intercept.mem.odds = glm(memory_check ~ 1, data=D.2yo, 
-                               family = "binomial")
-summary(glm.2yo.intercept.mem.odds)
-set.seed(2020)
-glm.global.boot(9,D.2yo) # 95% CI
-
-
-# examines whether participants who passed the memory check were more likely to 
-# choose the correct test object
-xtabs(~test_choice+memory_check,data=D.2yo)
-glm.2yo.mem.test.odds = glm(test_choice ~ memory_check, data=D.2yo, 
-                                 family = "binomial")
-summary(glm.2yo.mem.test.odds)
-Anova(glm.2yo.mem.test.odds)
-
-set.seed(2020)
-glm.global.boot(9,D.2yo) # 95% CI
 
 
 
@@ -331,38 +397,25 @@ glm.global.boot(9,D.2yo) # 95% CI
 #######################
 # 3-year-old analyses #
 #######################
-## 3-yo data full model ##
-glm.fit.3yo = glm(test_choice~condition+memory_check, 
-                  data=D.3yo, family="binomial",
-                  na.action = na.omit)
-
-summary(glm.fit.3yo)
-Anova(glm.fit.3yo)
-
-xtabs(~test_choice, data = D.3yo)
-glm.fit.3yo.intercept.tc = glm(test_choice ~ 1, data=D.3yo, 
+# main analysis
+main.glm.fit.3yo = glm(test_choice ~ 1, data=D.3yo, 
                                family = "binomial")
-summary(glm.fit.3yo.intercept.tc)
-set.seed(2020)
-glm.global.boot(9,D.3yo) # 95% CI
-bf.3yo.intercept = proportionBF(23,23+9,p=0.5) # this analysis indicates that 
-bf.3yo.intercept                                               # that there was overwhelming evidence
-                                               # in favor of the alternative hypothesis
-                                               # that 3-year-olds were more likely to choose
-                                               # the correct test object.
+summary(main.glm.fit.3yo)
+
+# ORs 
+main_analysis_threes_ORs = exp(coefficients(main.glm.fit.3yo))
+main_analysis_threes_ORs
+
+# 95% CI
+main_analysis_threes_boot = glm.global.boot(x=9,D.3yo)
+main_analysis_threes_boot
+
+# BF
+table(D.3yo$test_choice)
+main_analysis_threes_BF = proportionBF(23,32,p=0.5)
+main_analysis_threes_BF
 
 
-# participants overall odds of responding correctly on the memory check
-xtabs(~memory_check, data = D.3yo) # this analysis indicates that all but 1 3-year-old
-                                    # passed the memory check
-glm.fit.3yo.intercept.mc = glm(memory_check ~ 1, data=D.3yo, 
-                               family = "binomial")
-summary(glm.fit.3yo.intercept.mc)
-set.seed(2020)
-glm.global.boot(9,D.3yo) # 95% CI
-bf.3yo.memory.check = proportionBF(30,30+1,p=0.5) # this analysis also indicated that there was overwhelming evidence
-                                                  # that the 3-year-olds were more likely to pass the memory check
-                                                  # than not to pass the memory check.
 
 
 # omnibus 3-yo memory-check figure
