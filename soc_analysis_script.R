@@ -223,23 +223,6 @@ mean(D.3yo$age)*12
 table(D.3yo$sex)
 
 
-
-
-
-###########
-# RESULTS #
-###########
-names(D)
-main.glm.fit = glm(test_choice~(age_cat+memory_check)^2, data=D, family="binomial")
-summary(main.glm.fit)
-Anova(main.glm.fit)
-
-# no data-subsetted, intercept-only model
-# this analysis examines the overall log odds of choosing
-# the correct object averaged over all variables
-glm.fit = glm(test_choice~1, data=D, family="binomial")
-summary(glm.fit)
-
 ###########################
 # MEMORY CHECK COMPARISON #
 ###########################
@@ -358,6 +341,16 @@ main_analysis_twos_BF = proportionBF(13,32,p=0.5)
 main_analysis_twos_BF
 
 
+# analysis for those who failed the memory check
+glm.fit.2yo.failed.mc = glm(test_choice~1, data=D.2yo, subset = D.2yo$memory_check=="Incorrect",
+                       family="binomial")
+summary(glm.fit.2yo.failed.mc)
+
+
+# analysis for those who passed the memory check
+glm.fit.2yo.passed.mc = glm(test_choice~1, data=D.2yo, subset = D.2yo$memory_check=="Correct",
+                            family="binomial")
+summary(glm.fit.2yo.passed.mc)
 
 #############################
 # 2-year-old omnibus figure #
@@ -415,6 +408,31 @@ table(D.3yo$test_choice)
 main_analysis_threes_BF = proportionBF(23,32,p=0.5)
 main_analysis_threes_BF
 
+# analysis for those who failed the memory check
+glm.fit.3yo.failed.mc = glm(test_choice~1, data=D.3yo, subset = D.3yo$memory_check=="Incorrect",
+                            family="binomial")
+summary(glm.fit.3yo.failed.mc) # Note that this analysis doesn't make sense because only 1 child 
+                               # failed the memory check. 
+
+
+# analysis for those who passed the memory check
+glm.fit.3yo.passed.mc = glm(test_choice~1, data=D.3yo, subset = D.3yo$memory_check=="Correct",
+                            family="binomial")
+summary(glm.fit.3yo.passed.mc)
+
+# ORs 
+glm.fit.3yo.passed.mc.ORs = exp(coefficients(glm.fit.3yo.passed.mc))
+glm.fit.3yo.passed.mc.ORs
+
+# 95% CI
+D.3yo.correct.mc = subset(D.3yo, ! memory_check %in% c("Incorrect"))
+D.3yo.correct.mc.boot = glm.global.boot(x=9,D.3yo.correct.mc)
+D.3yo.correct.mc.boot
+
+# BF
+table(D.3yo.correct.mc$test_choice)
+D.3yo.correct.mc.BF = proportionBF(8,30,p=0.5)
+D.3yo.correct.mc.BF
 
 
 
