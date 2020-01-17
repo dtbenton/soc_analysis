@@ -1,0 +1,53 @@
+addNet SOC
+
+# input groups
+addGroup Shape 12 INPUT
+addGroup Color 3 INPUT
+addGroup Feature 2 INPUT
+
+# context group
+addGroup hidden 13
+
+# output group 
+addGroup ShapeOUT 12 OUTPUT
+addGroup ColorOUT 3 OUTPUT
+addGroup FeatureOUT 2 OUTPUT
+addGroup ActivityOUT 1 OUTPUT
+
+# connect groups (input => hidden => output)
+connectGroups   {Shape Color Feature} hidden {ShapeOUT ColorOUT FeatureOUT ActivityOUT}
+
+# training examples: 
+loadExamples SOC_cond_A_static.ex
+loadExamples SOC_cond_A_dynamic.ex
+loadExamples SOC_cond_A_test.ex
+loadExamples SOC_cond_B_static.ex
+loadExamples SOC_cond_B_dynamic.ex
+loadExamples SOC_cond_B_test.ex
+loadExamples SOC_cond_C_static.ex
+loadExamples SOC_cond_C_dynamic.ex
+loadExamples SOC_cond_C_test.ex
+loadExamples SOC_cond_D_static.ex
+loadExamples SOC_cond_D_dynamic.ex
+loadExamples SOC_cond_D_test.ex
+
+# set learning and display parameters
+setObj learningRate 0.001
+setObj momentum	    0.875
+setObj batchSize    0
+setObj numUpdates   10
+setObj reportInterval 1
+setObj unitCellSize 40
+setObj linkCellSize 10
+setObj weightDecay 0.005
+setObj randRange 0.8
+
+
+# the commands below specify how the network will be displayed in Lens
+resetPlot 
+plotRow 2 b 5 n ActivityOUT 1
+plotRow 4 b 1 n ShapeOUT 4 b 1 n ColorOUT 3 b 1 n FeatureOUT 2  
+plotRow 4 b 4 n hidden 5 
+plotRow 5 b 1 n Shape 4 b 1 n Color 3 b 1 n Feature 2 
+drawUnits
+viewUnits
