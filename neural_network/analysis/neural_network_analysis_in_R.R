@@ -333,7 +333,7 @@ main_older_threes_nets_kids_chi_square = chisq.test(main_older_threes_nets_kids_
 main_older_threes_nets_kids_chi_square
 
 # BF
-main_older_threes_nets_kids_BF = proportionBF(20,43,p=0.5)
+main_older_threes_nets_kids_BF = proportionBF(20,50,p=0.5)
 main_older_threes_nets_kids_BF
 
 # Younger nets vs 2s comparison #
@@ -341,15 +341,13 @@ main_older_threes_nets_kids_BF
 main_younger_twos_nets_kids_TAB = xtabs(~age+test_choice,data = D.younger.nets.children)
 main_younger_twos_nets_kids_TAB
 
-main_younger_twos_nets_kids_chi_square = chisq.test(main_younger_twos_nets_kids_TAB, 
+main_younger_twos_nets_kids_chi_square = chisq.test(main_younger_twos_nets_kids_TAB[,2], 
                                                     correct = FALSE)
 
 main_younger_twos_nets_kids_chi_square
 
 # BF
-main_younger_twos_nets_kids_BF = contingencyTableBF(main_younger_twos_nets_kids_TAB,
-                                                    sampleType = "indepMulti",
-                                                    fixedMargin = "cols")
+main_younger_twos_nets_kids_BF = proportionBF(9,19+9,p=0.5)
 main_younger_twos_nets_kids_BF
 
 
@@ -358,13 +356,11 @@ main_younger_twos_nets_kids_BF
 main_younger_twos_nets_kids_TAB = xtabs(~age+memory_check,data = D.younger.nets.children)
 main_younger_twos_nets_kids_TAB
 
-main_younger_twos_nets_kids_chi_square = chisq.test(main_younger_twos_nets_kids_TAB, 
+main_younger_twos_nets_kids_chi_square = chisq.test(main_younger_twos_nets_kids_TAB[,2], 
                                                     correct = FALSE)
 
 main_younger_twos_nets_kids_chi_square
 
 # BF
-main_younger_twos_nets_kids_BF = contingencyTableBF(main_younger_twos_nets_kids_TAB,
-                                           sampleType = "indepMulti",
-                                           fixedMargin = "cols")
+main_younger_twos_nets_kids_BF = proportionBF(11,17,p=0.5)
 main_younger_twos_nets_kids_BF
