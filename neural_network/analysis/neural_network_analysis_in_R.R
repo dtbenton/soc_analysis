@@ -41,6 +41,10 @@ dim(D)
 D$test_choice = revalue(x = as.factor(D$test_choice), 
                         c("0" = "Incorrect", "1"="Correct"))
 
+# memory_check
+D$memory_check = revalue(x = as.factor(D$memory_check), 
+                        c("0" = "Incorrect", "1"="Correct"))
+
 # age
 D$age = revalue(x = as.factor(D$age), 
                     c("0" = "Older", "1"="Younger"))
@@ -184,6 +188,27 @@ main_analysis_twos_BF = proportionBF(11,20,p=0.5)
 main_analysis_twos_BF
 
 
+#####################################
+# 2-year-old analyses: memory check #
+#####################################
+# main analysis
+mm.glm.fit.2yo = glm(memory_check~1, data=D.2yo, family="binomial")
+summary(mm.glm.fit.2yo)
+
+# ORs 
+mm_analysis_twos_ORs = exp(coefficients(mm.glm.fit.2yo))
+mm_analysis_twos_ORs
+
+# 95% CI
+mm_analysis_twos_boot = glm.global.boot(x=5,D.2yo)
+mm_analysis_twos_boot
+
+# BF
+table(D.2yo$memory_check)
+mm_analysis_twos_BF = proportionBF(11,20,p=0.5)
+mm_analysis_twos_BF
+
+
 #############################
 # 2-year-old omnibus figure #
 #############################
@@ -248,3 +273,98 @@ p.3yo.mc+geom_bar(fill=c("#FF9999","black")) + theme_bw() + # remove the gray ba
 # ability to detect SOCs involving an objects' internal feature and its
 # causal efficacy. 
 ########################################################################
+
+
+
+
+#############################
+# CROSS EXPERIMENT ANALYSIS #
+#############################
+D.2 = read.csv(file.choose(), header = TRUE)
+
+# get dimension of D
+dim(D)
+
+# test_choice
+D.2$test_choice = revalue(x = as.factor(D.2$test_choice), 
+                        c("0" = "Incorrect", "1"="Correct"))
+
+# memory_check
+D.2$memory_check = revalue(x = as.factor(D.2$memory_check), 
+                         c("0" = "Incorrect", "1"="Correct"))
+
+# age
+D.2$age = revalue(x = as.factor(D.2$age), 
+                c("0" = "Older_Nets", "1"="Younger_Nets",
+                  "2" = "Twos", "3" = "Threes"))
+
+# subset data into different dataframe
+D.older.nets.children = subset(D.2, ! age %in% c("Younger_Nets","Twos"))
+D.older.nets.children$age = factor(D.older.nets.children$age) 
+str(D.older.nets.children)
+
+D.younger.nets.children = subset(D.2, ! age %in% c("Older_Nets", "Threes"))
+D.younger.nets.children$age = factor(D.younger.nets.children$age) 
+str(D.older.nets.children)
+
+# Older nets vs 3s comparison #
+# test choice comparison
+main_older_threes_nets_kids_TAB = xtabs(~age+test_choice,data = D.older.nets.children)
+main_older_threes_nets_kids_TAB
+
+main_older_threes_nets_kids_chi_square = chisq.test(main_older_threes_nets_kids_TAB[,2], 
+                                                    correct = FALSE)
+
+main_older_threes_nets_kids_chi_square
+
+# BF
+main_older_threes_nets_kids_BF = proportionBF(20,43,p=0.5)
+main_older_threes_nets_kids_BF
+
+
+# Older nets vs 3s comparison #
+# memory check comparison
+main_older_threes_nets_kids_TAB = xtabs(~age+memory_check,data = D.older.nets.children)
+main_older_threes_nets_kids_TAB
+
+main_older_threes_nets_kids_chi_square = chisq.test(main_older_threes_nets_kids_TAB[,2], 
+                                                    correct = FALSE)
+
+main_older_threes_nets_kids_chi_square
+
+# BF
+main_older_threes_nets_kids_BF = proportionBF(20,43,p=0.5)
+main_older_threes_nets_kids_BF
+
+# Younger nets vs 2s comparison #
+# test choice comparison
+main_younger_twos_nets_kids_TAB = xtabs(~age+test_choice,data = D.younger.nets.children)
+main_younger_twos_nets_kids_TAB
+
+main_younger_twos_nets_kids_chi_square = chisq.test(main_younger_twos_nets_kids_TAB, 
+                                                    correct = FALSE)
+
+main_younger_twos_nets_kids_chi_square
+
+# BF
+main_younger_twos_nets_kids_BF = contingencyTableBF(main_younger_twos_nets_kids_TAB,
+                                                    sampleType = "indepMulti",
+                                                    fixedMargin = "cols")
+main_younger_twos_nets_kids_BF
+
+
+# Younger nets vs 2s comparison #
+# memory check comparison
+main_younger_twos_nets_kids_TAB = xtabs(~age+memory_check,data = D.younger.nets.children)
+main_younger_twos_nets_kids_TAB
+
+main_younger_twos_nets_kids_chi_square = chisq.test(main_younger_twos_nets_kids_TAB, 
+                                                    correct = FALSE)
+
+main_younger_twos_nets_kids_chi_square
+
+# BF
+main_younger_twos_nets_kids_BF = contingencyTableBF(main_younger_twos_nets_kids_TAB,
+                                           sampleType = "indepMulti",
+                                           fixedMargin = "cols")
+main_younger_twos_nets_kids_BF
