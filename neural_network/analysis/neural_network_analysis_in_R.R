@@ -43,11 +43,11 @@ D$test_choice = revalue(x = as.factor(D$test_choice),
 
 # memory_check
 D$memory_check = revalue(x = as.factor(D$memory_check), 
-                        c("0" = "Incorrect", "1"="Correct"))
+                         c("0" = "Incorrect", "1"="Correct"))
 
 # age
 D$age = revalue(x = as.factor(D$age), 
-                    c("0" = "Older", "1"="Younger"))
+                c("0" = "Older", "1"="Younger"))
 
 
 # subset data to obtain two dataframes for 2 and 3 year olds #
@@ -59,6 +59,13 @@ D.2yo = subset(D, ! age %in% c("Older"))    # This creates a subsetted dataframe
 D.3yo = subset(D, ! age %in% c("Younger")) # This creates a subsetted dataframe 
 # containing only the data of the 2-year-olds
 
+
+# subset data for those who failed the memory check
+D.failed.mc = subset(D, ! memory_check %in% c("Correct"))
+
+
+# subset data for those who passed the memory check
+D.passed.mc = subset(D, ! memory_check %in% c("Incorrect"))
 
 ####################
 ####################
@@ -109,7 +116,7 @@ baseline_success_odds = baseline_sucess_prob/(1-baseline_sucess_prob) # this is 
 # the two-year-olds but averaged across all predictors
 table(D$test_choice[D$age=="Younger"])
 two_year_old_success_prob = table(D$test_choice[D$age=="Younger"])[[2]]/(table(D$test_choice[D$age=="Younger"])[[1]]+
-                                                                               table(D$test_choice[D$age=="Younger"])[[2]])
+                                                                           table(D$test_choice[D$age=="Younger"])[[2]])
 
 two_year_old_success_odds = two_year_old_success_prob/(1-two_year_old_success_prob) # this is what will be shown
 # as the overall 'odds' for a
@@ -140,141 +147,61 @@ two_year_old_success_odds = two_year_old_success_prob/(1-two_year_old_success_pr
 # METHODS #
 ###########
 
-####################################
-# MAIN ANALYSES COMPARING 2S TO 3S #
-####################################
-main_analysis_comparison = glm(test_choice~(age+condition)^2,
-                               data=D, family="binomial",
-                               na.action = na.omit)
-summary(main_analysis_comparison)
-Anova(main_analysis_comparison)
+##########################################################################
+# MAIN ANALYSES: COMPARING THOSE WHO PASSED AND FAILED THE MEMORY CHECK #
+##########################################################################
+# Passed vs Failed proportion of correct test choices
+table(D$test_choice[D$memory_check=="Correct"])
+table(D$test_choice[D$memory_check=="Incorrect"])
+main_analysis_mc_binom_test = binom.test(20,22, 
+                                         p = 0.5)
+main_analysis_mc_binom_test
 
-# ORs 
-main_analysis_ORs = exp(coefficients(main_analysis_comparison))
-main_analysis_ORs
-
-
-# 95% CIs
-main_analysis_CIs = glm.global.boot_modified(9, 3, D)
-main_analysis_CIs
-
-# BF
-main_analysis_conting_tab = xtabs(~ age_cat + test_choice, data = D)
-main_analysis_conting_tab
-
-main_analysis_conting_BF = contingencyTableBF(main_analysis_conting_tab,
-                                              sampleType = "indepMulti",
-                                              fixedMargin = "cols")
-main_analysis_conting_BF
-
+# BF for 2s vs 3s of correct test choices
+proportionBF(17,20,p=0.5)
 
 #####################################
-# 2-year-old analyses: test choices #
+# failed MCers: test choices #
 #####################################
 # main analysis
-main.glm.fit.2yo = glm(test_choice~1, data=D.2yo, family="binomial")
-summary(main.glm.fit.2yo)
+main.glm.fit.failed.mc = glm(test_choice~1, data=D.failed.mc, family="binomial")
+summary(main.glm.fit.failed.mc)
 
 # ORs 
-main_analysis_twos_ORs = exp(coefficients(main.glm.fit.2yo))
-main_analysis_twos_ORs
+main.glm.fit.failed.mc_ORs = exp(coefficients(main.glm.fit.failed.mc))
+main.glm.fit.failed.mc_ORs
 
 # 95% CI
-main_analysis_twos_boot = glm.global.boot(x=4,D.2yo)
-main_analysis_twos_boot
+main.glm.fit.failed.mc_boot = glm.global.boot(x=9, D.failed.mc)
+main.glm.fit.failed.mc_boot
 
 # BF
-main_analysis_twos_BF = proportionBF(11,20,p=0.5)
-main_analysis_twos_BF
+main.glm.fit.failed.mc_BF = proportionBF(10,17,p=0.5)
+main.glm.fit.failed.mc_BF
+
 
 
 #####################################
-# 2-year-old analyses: memory check #
+# Passed MCers: test choices #
 #####################################
 # main analysis
-mm.glm.fit.2yo = glm(memory_check~1, data=D.2yo, family="binomial")
-summary(mm.glm.fit.2yo)
+main.glm.fit.passed.mc = glm(test_choice~1, data=D.passed.mc, family="binomial")
+summary(main.glm.fit.passed.mc)
+
+main.glm.fit.passed.mc.binom.test = binom.test(20,20,p=0.5)
+main.glm.fit.passed.mc.binom.test
 
 # ORs 
-mm_analysis_twos_ORs = exp(coefficients(mm.glm.fit.2yo))
-mm_analysis_twos_ORs
+main.glm.fit.passed.mc_ORs = exp(coefficients(main.glm.fit.passed.mc))
+main.glm.fit.passed.mc_ORs
 
 # 95% CI
-mm_analysis_twos_boot = glm.global.boot(x=5,D.2yo)
-mm_analysis_twos_boot
+main.glm.fit.passed.mc_boot = glm.global.boot(x=4, D.passed.mc)
+main.glm.fit.passed.mc_boot
 
 # BF
-table(D.2yo$memory_check)
-mm_analysis_twos_BF = proportionBF(11,20,p=0.5)
-mm_analysis_twos_BF
-
-
-#############################
-# 2-year-old omnibus figure #
-#############################
-
-# omnibus 2-yo figure
-p.2yo.tc = ggplot(D.2yo, aes(test_choice, fill = test_choice)) # THE FIRST ARGUMENT VALUES AFTER 'AES' CORRESPONDS
-p.2yo.tc+geom_bar() + theme_bw() + # remove the gray background
-  scale_fill_manual(values= c("#FF9999","black")) +
-  theme(panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) +
-  scale_y_continuous(expand = c(0, 0)) + # ensure that bars hit the x-axis
-  coord_cartesian(ylim=c(0, 20))
-
-
-
-#######################################################################
-############ SUMMARY '2-yo data-subsetted full model' #################
-#######################################################################
-# This analysis is consistent with the results from Experiment 1, in which
-# it was shown that 2-year-olds were equally likely to choose the correct and
-# incorrect test objects. 
-########################################################################
-
-
-#######################
-# 3-year-old analyses #
-#######################
-# main analysis
-main.glm.fit.3yo.tabs = xtabs(~test_choice, data = D.3yo)
-main.glm.fit.3yo.tabs
-
-main.glm.fit.3yo = chisq.test(main.glm.fit.3yo.tabs,
-                              correct = FALSE)
-main.glm.fit.3yo
-
-# BF
-table(D.3yo$test_choice)
-main_analysis_threes_BF = proportionBF(20,20,p=0.5)
-main_analysis_threes_BF
-
-
-# omnibus 3-yo memory-check figure
-p.3yo.mc = ggplot(D.3yo, aes(memory_check)) # THE FIRST ARGUMENT VALUES AFTER 'AES' CORRESPONDS
-p.3yo.mc+geom_bar(fill=c("#FF9999","black")) + theme_bw() + # remove the gray background
-  theme(panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) +
-  scale_y_continuous(expand = c(0, 0)) + # ensure that bars hit the x-axis
-  coord_cartesian(ylim=c(0, 25))
-
-
-
-#######################################################################
-############ SUMMARY '3-yo data-subsetted full model' #################
-#######################################################################
-# The analyses indicates that, unlike the younger networks, the older networks
-# were both more likely to choose the correct test object and more likely to 
-# pass the memory check, which indicates that they encoded both the first-
-# and second-order relations between the objects, the features, and the 
-# machines' activation. 
-
-# Together, these results indicate a developmental progression in children's
-# ability to detect SOCs involving an objects' internal feature and its
-# causal efficacy. 
-########################################################################
-
-
+main.glm.fit.passed.mc_BF = proportionBF(20,20,p=0.5)
+main.glm.fit.passed.mc_BF
 
 
 #############################
@@ -287,80 +214,51 @@ dim(D)
 
 # test_choice
 D.2$test_choice = revalue(x = as.factor(D.2$test_choice), 
-                        c("0" = "Incorrect", "1"="Correct"))
+                          c("0" = "Incorrect", "1"="Correct"))
 
 # memory_check
 D.2$memory_check = revalue(x = as.factor(D.2$memory_check), 
-                         c("0" = "Incorrect", "1"="Correct"))
+                           c("0" = "Incorrect", "1"="Correct"))
 
 # age
 D.2$age = revalue(x = as.factor(D.2$age), 
-                c("0" = "Older_Nets", "1"="Younger_Nets",
-                  "2" = "Twos", "3" = "Threes"))
+                  c("0" = "Older_Nets", "1"="Younger_Nets",
+                    "2" = "Twos", "3" = "Threes"))
+
+# type
+D.2$type = revalue(x = as.factor(D.2$type), 
+                 c("0" = "Network", "1"="Human"))
 
 # subset data into different dataframe
-D.older.nets.children = subset(D.2, ! age %in% c("Younger_Nets","Twos"))
-D.older.nets.children$age = factor(D.older.nets.children$age) 
-str(D.older.nets.children)
+D.passed.nets.children = subset(D.2, ! memory_check %in% c("Incorrect"))
+D.passed.nets.children$memory_check = factor(D.passed.nets.children$memory_check) 
+str(D.passed.nets.children)
 
-D.younger.nets.children = subset(D.2, ! age %in% c("Older_Nets", "Threes"))
-D.younger.nets.children$age = factor(D.younger.nets.children$age) 
-str(D.older.nets.children)
+D.failed.nets.children = subset(D.2, ! memory_check %in% c("Correct"))
+D.failed.nets.children$memory_check = factor(D.failed.nets.children$memory_check) 
+str(D.failed.nets.children)
 
-# Older nets vs 3s comparison #
+# Passed nets vs Passed Humans comparison #
 # test choice comparison
-main_older_threes_nets_kids_TAB = xtabs(~age+test_choice,data = D.older.nets.children)
-main_older_threes_nets_kids_TAB
+main_passed_threes_nets_kids_TAB = xtabs(~test_choice+type,data = D.passed.nets.children)
+main_passed_threes_nets_kids_TAB
 
-main_older_threes_nets_kids_chi_square = chisq.test(main_older_threes_nets_kids_TAB[,2], 
-                                                    correct = FALSE)
-
-main_older_threes_nets_kids_chi_square
+main_passed_threes_nets_kids_binom_test = binom.test(20,37,p=0.5)
+main_passed_threes_nets_kids_binom_test
 
 # BF
-main_older_threes_nets_kids_BF = proportionBF(20,43,p=0.5)
-main_older_threes_nets_kids_BF
+main_passed_threes_nets_kids_BF = proportionBF(20,37,p=0.5)
+main_passed_threes_nets_kids_BF
 
 
-# Older nets vs 3s comparison #
-# memory check comparison
-main_older_threes_nets_kids_TAB = xtabs(~age+memory_check,data = D.older.nets.children)
-main_older_threes_nets_kids_TAB
-
-main_older_threes_nets_kids_chi_square = chisq.test(main_older_threes_nets_kids_TAB[,2], 
-                                                    correct = FALSE)
-
-main_older_threes_nets_kids_chi_square
-
-# BF
-main_older_threes_nets_kids_BF = proportionBF(20,50,p=0.5)
-main_older_threes_nets_kids_BF
-
-# Younger nets vs 2s comparison #
+# Failed nets vs Passed Humans comparison #
 # test choice comparison
-main_younger_twos_nets_kids_TAB = xtabs(~age+test_choice,data = D.younger.nets.children)
-main_younger_twos_nets_kids_TAB
+main_failed_threes_nets_kids_TAB = xtabs(~test_choice+type,data = D.failed.nets.children)
+main_failed_threes_nets_kids_TAB
 
-main_younger_twos_nets_kids_chi_square = chisq.test(main_younger_twos_nets_kids_TAB[,2], 
-                                                    correct = FALSE)
-
-main_younger_twos_nets_kids_chi_square
+main_failed_threes_nets_kids_binom_test = binom.test(3,5,p=0.5)
+main_failed_threes_nets_kids_binom_test
 
 # BF
-main_younger_twos_nets_kids_BF = proportionBF(9,19+9,p=0.5)
-main_younger_twos_nets_kids_BF
-
-
-# Younger nets vs 2s comparison #
-# memory check comparison
-main_younger_twos_nets_kids_TAB = xtabs(~age+memory_check,data = D.younger.nets.children)
-main_younger_twos_nets_kids_TAB
-
-main_younger_twos_nets_kids_chi_square = chisq.test(main_younger_twos_nets_kids_TAB[,2], 
-                                                    correct = FALSE)
-
-main_younger_twos_nets_kids_chi_square
-
-# BF
-main_younger_twos_nets_kids_BF = proportionBF(11,17,p=0.5)
-main_younger_twos_nets_kids_BF
+main_failed_threes_nets_kids_BF = proportionBF(3,5,p=0.5)
+main_failed_threes_nets_kids_BF
