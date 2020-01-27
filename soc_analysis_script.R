@@ -297,6 +297,28 @@ mem_check_threes_BF
 ####################################
 # MAIN ANALYSES COMPARING 2S TO 3S #
 ####################################
+# 3s vs 2s proportion of correct test choices
+table(D$test_choice[D$age_cat=="Younger"])
+table(D$test_choice[D$age_cat=="Older"])
+main_analysis_binom_test = binom.test(14,20, 
+                                      p = 0.5)
+main_analysis_binom_test
+
+# BF for 2s vs 3s of correct test choices
+proportionBF(14,20,p=0.5)
+
+
+# Correct MC vs Incorrect MC proportion of correct test choices
+table(D$test_choice[D$memory_check=="Correct"])
+table(D$test_choice[D$memory_check=="Incorrect"])
+main_analysis_binom_test_2 = binom.test(17,20, 
+                                      p = 0.5,
+                                      alternative = "greater")
+main_analysis_binom_test_2
+
+# BF for correct MC vs Incorrect MC proportion of correct test choices
+proportionBF(17,20,p=0.5)
+
 main_analysis_comparison = glm(test_choice~age_cat,
                                data=D, family="binomial",
                                na.action = na.omit)
