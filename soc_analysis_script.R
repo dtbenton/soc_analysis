@@ -76,6 +76,17 @@ D.3yo = subset(D, ! age_cat %in% c("Younger")) # This creates a subsetted datafr
                                      # containing only the data of the 2-year-olds
 
 
+
+# subset data to obtain two dataframes for those who passed and failed memory check #
+D.passed.mc = subset(D, ! memory_check %in% c("Incorrect"))    # This creates a subsetted dataframe 
+# containing only the data of those who passed the memory check
+
+
+
+D.failed.mc = subset(D, ! memory_check %in% c("Correct")) # This creates a subsetted dataframe 
+# containing only the data of those who failed the memory check
+
+
 ####################
 ####################
 # global function  #
