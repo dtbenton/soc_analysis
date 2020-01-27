@@ -146,9 +146,7 @@ two_year_old_success_odds = two_year_old_success_prob/(1-two_year_old_success_pr
                                                                                     # odds will be what's reported by R
                                                                                     # I.e., log(two_year_old_success_odds)
 
-# plot two-year-old (baseline) distributions
-p.2y = ggplot(D.2yo, aes(test_choice)) # THE FIRST ARGUMENT VALUES AFTER 'AES' CORRESPONDS
-p.2y+geom_bar()
+
 
 # get baseline proportion (or odds) of success (i.e., 1/0+1), for
 # the three-year-olds but averaged across all predictors
@@ -164,35 +162,24 @@ three_year_old_success_odds = three_year_old_success_prob/(1-three_year_old_succ
                                                                                           # I.e., log(two_year_old_success_odds)
 
 
-# plot three-year-old (baseline) distributions
-p.3y = ggplot(D.3yo, aes(test_choice)) # THE FIRST ARGUMENT VALUES AFTER 'AES' CORRESPONDS
-p.3y+geom_bar()
 
 
-##########################################################################
-# preliminary analysis to determine whether random effects are necessary #
-##########################################################################
-# the analyses below establish whether a random intercept is needed
-mod1 = glmer(test_choice ~ 1 + (1|ID), data=D, family = "binomial")
-summary(mod1) # SUMMARY OF MODEL 1
-icc_mod1 = mod1@theta[1]^2/ (mod1@theta[1]^2 + (3.14159^2/3)) # ICC of mod1
-icc_mod1
+# get baseline proportion (or odds) of success (i.e., 1/0+1), for
+# those who passed the memory check
+table(D.passed.mc$test_choice)
+passed_mc_success_prob = table(D.passed.mc$test_choice)[[2]]/(table(D.passed.mc$test_choice)[[1]]+
+                                                                     table(D.passed.mc$test_choice)[[2]])
+passed_mc_success_odds = passed_mc_success_prob/(1-passed_mc_success_prob) 
 
-mod1_2yo = glmer(test_choice ~ 1 + (1|ID), data=D.2yo, family = "binomial")
-summary(mod1_2yo) # SUMMARY OF MODEL 1
-icc_mod1_2yo = mod1_2yo@theta[1]^2/ (mod1_2yo@theta[1]^2 + (3.14159^2/3)) # ICC of mod1
-icc_mod1_2yo
 
-mod1_3yo = glmer(test_choice ~ 1 + (1|ID), data=D.3yo, family = "binomial")
-summary(mod1_3yo) # SUMMARY OF MODEL 1
-icc_mod1_3yo = mod1_3yo@theta[1]^2/ (mod1_3yo@theta[1]^2 + (3.14159^2/3)) # ICC of mod1
-icc_mod1_3yo
 
-# summary #
-# The above analysis indicate that the inclusion of a random-effect intercept for subjects
-# is not necessary, given that the random intercepts account for nearly 0 percent of the 
-# variance i the log odds of answering the test question correctly. This means that
-# the analysis reported below do not include a random-intercept term for subjects.
+# get baseline proportion (or odds) of success (i.e., 1/0+1), for
+# those who failed the memory check
+table(D.failed.mc$test_choice)
+failed_mc_success_prob = table(D.failed.mc$test_choice)[[2]]/(table(D.failed.mc$test_choice)[[1]]+
+                                                                table(D.failed.mc$test_choice)[[2]])
+failed_mc_success_odds = failed_mc_success_prob/(1-failed_mc_success_prob) 
+
 
 
 #################
@@ -305,9 +292,9 @@ mem_check_threes_BF = proportionBF(30,32,p=0.5)
 mem_check_threes_BF
 
 
-####################################
-# MAIN ANALYSES COMPARING 2S TO 3S #
-####################################
+#####################################
+# MAIN ANALYSES: COMPARING 2S TO 3S #
+#####################################
 # 3s vs 2s proportion of correct test choices
 table(D$test_choice[D$age_cat=="Younger"])
 table(D$test_choice[D$age_cat=="Older"])
@@ -318,14 +305,6 @@ main_analysis_binom_test
 # BF for 2s vs 3s of correct test choices
 proportionBF(14,20,p=0.5)
 
-
-# Correct MC vs Incorrect MC proportion of correct test choices
-table(D$test_choice[D$memory_check=="Correct"])
-table(D$test_choice[D$memory_check=="Incorrect"])
-main_analysis_binom_test_2 = binom.test(17,20, 
-                                      p = 0.5,
-                                      alternative = "greater")
-main_analysis_binom_test_2
 
 # BF for correct MC vs Incorrect MC proportion of correct test choices
 proportionBF(17,20,p=0.5)
@@ -492,3 +471,62 @@ p.3yo.mc+geom_bar(fill=c("#FF9999","black")) + theme_bw() + # remove the gray ba
 # ability to detect SOCs involving an objects' internal feature and its
 # causal efficacy. 
 ########################################################################
+
+
+
+
+##########################################################################
+# MAIN ANALYSES: COMPARING THOSE WHO PASSED AND FAILED THE MEMORY CHECK #
+##########################################################################
+# Passed vs Failed proportion of correct test choices
+table(D$test_choice[D$memory_check=="Correct"])
+table(D$test_choice[D$memory_check=="Incorrect"])
+main_analysis_mc_binom_test = binom.test(17,20, 
+                                      p = 0.5)
+main_analysis_mc_binom_test
+
+# BF for 2s vs 3s of correct test choices
+proportionBF(17,20,p=0.5)
+
+#####################################
+# failed MCers: test choices #
+#####################################
+# main analysis
+main.glm.fit.failed.mc = glm(test_choice~1, data=D.failed.mc, family="binomial")
+summary(main.glm.fit.failed.mc)
+
+# ORs 
+main.glm.fit.failed.mc_ORs = exp(coefficients(main.glm.fit.failed.mc))
+main.glm.fit.failed.mc_ORs
+
+# 95% CI
+main.glm.fit.failed.mc_boot = glm.global.boot(x=9, D.failed.mc)
+main.glm.fit.failed.mc_boot
+
+# BF
+main.glm.fit.failed.mc_BF = proportionBF(10,17,p=0.5)
+main.glm.fit.failed.mc_BF
+
+
+
+#####################################
+# Passed MCers: test choices #
+#####################################
+# main analysis
+main.glm.fit.passed.mc = glm(test_choice~1, data=D.passed.mc, family="binomial")
+summary(main.glm.fit.passed.mc)
+
+# ORs 
+main.glm.fit.passed.mc_ORs = exp(coefficients(main.glm.fit.passed.mc))
+main.glm.fit.passed.mc_ORs
+
+# 95% CI
+main.glm.fit.passed.mc_boot = glm.global.boot(x=9, D.passed.mc)
+main.glm.fit.passed.mc_boot
+
+# BF
+main.glm.fit.passed.mc_BF = proportionBF(32,47,p=0.5)
+main.glm.fit.passed.mc_BF
+
+
+
