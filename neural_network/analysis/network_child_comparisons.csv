@@ -1,4 +1,4 @@
-ID,age,type,condition,test_choice,memory_check
+ID,mc_status,type,condition,test_choice,memory_check
 1,0,0,A,1,1
 2,0,0,A,1,1
 3,0,0,A,1,1

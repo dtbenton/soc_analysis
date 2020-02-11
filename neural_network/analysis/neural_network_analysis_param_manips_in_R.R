@@ -47,17 +47,17 @@ D$memory_check = revalue(x = as.factor(D$memory_check),
 
 
 # age
-D$age = revalue(x = as.factor(D$age), 
-                    c("0" = "Older", "1"="Younger"))
+D$mc_status = revalue(x = as.factor(D$mc_status), 
+                    c("0" = "MC_Correct", "1"="MC_Incorrect"))
 
 
 # subset data to obtain two dataframes for 2 and 3 year olds #
-D.2yo = subset(D, ! age %in% c("Older"))    # This creates a subsetted dataframe 
+D.MCincorrect = subset(D, ! mc_status %in% c("MC_Correct"))    # This creates a subsetted dataframe 
 # containing only the data of the 2-year-olds
 
 
 
-D.3yo = subset(D, ! age %in% c("Younger")) # This creates a subsetted dataframe 
+D.MCcorrect = subset(D, ! mc_status %in% c("MC_Incorrect")) # This creates a subsetted dataframe 
 # containing only the data of the 2-year-olds
 
 
@@ -108,11 +108,11 @@ baseline_success_odds = baseline_sucess_prob/(1-baseline_sucess_prob) # this is 
 
 # get baseline proportion (or odds) of success (i.e., 1/0+1), for
 # the two-year-olds but averaged across all predictors
-table(D$test_choice[D$age=="Younger"])
-two_year_old_success_prob = table(D$test_choice[D$age=="Younger"])[[2]]/(table(D$test_choice[D$age=="Younger"])[[1]]+
-                                                                               table(D$test_choice[D$age=="Younger"])[[2]])
+table(D$test_choice[D$mc_status=="MC_Incorrect"])
+mc_incorrect_success_prob = table(D$test_choice[D$mc_status=="MC_Incorrect"])[[2]]/(table(D$test_choice[D$mc_status=="MC_Incorrect"])[[1]]+
+                                                                               table(D$test_choice[D$mc_status=="MC_Incorrect"])[[2]])
 
-two_year_old_success_odds = two_year_old_success_prob/(1-two_year_old_success_prob) # this is what will be shown
+mc_incorrect_success_odds = mc_incorrect_success_prob/(1-mc_incorrect_success_prob) # this is what will be shown
 # as the overall 'odds' for a
 # a model in which all the 
 # predictors are set to '0'
@@ -141,76 +141,55 @@ two_year_old_success_odds = two_year_old_success_prob/(1-two_year_old_success_pr
 # METHODS #
 ###########
 
-## 2-YEAR-OLDS ##
+## MC_Incorrect ##
 # HUs 
-table(D.2yo$test_choice[D.2yo$param_change=="HU"])
-HUs.2yo.main = glm(test_choice~1, data=D.2yo,
-              subset = D.2yo$param_change=="HU",
-              family="binomial")
-summary(HUs.2yo.main)
+table(D.MCincorrect$test_choice[D.MCincorrect$param_change=="HU"])
+HUs.MCincorrect.main = binom.test(4,8,p=0.5)
+HUs.MCincorrect.main
 
-HUs.2yo.main.ORs = exp(coefficients(HUs.2yo.main))
-HUs.2yo.main.ORs
-
-HUs.2yo.main.BFs = proportionBF(4,8,p=0.5)
-HUs.2yo.main.BFs
+HUs.MCincorrect.main.BFs = proportionBF(4,8,p=0.5)
+HUs.MCincorrect.main.BFs
 
 # WD
-table(D.2yo$test_choice[D.2yo$param_change=="WD"])
-WD.2yo.main = glm(test_choice~1, data=D.2yo,
-                   subset = D.2yo$param_change=="WD",
-                   family="binomial")
-summary(WD.2yo.main)
+table(D.MCincorrect$test_choice[D.MCincorrect$param_change=="WD"])
+WD.MCincorrect.main = binom.test(5,8,p=0.5)
+WD.MCincorrect.main
 
-WD.2yo.main.ORs = exp(coefficients(WD.2yo.main))
-WD.2yo.main.ORs
-
-WD.2yo.main.BFs = proportionBF(5,8,p=0.5)
-WD.2yo.main.BFs
+WD.MCincorrect.main.BFs = proportionBF(5,8,p=0.5)
+WD.MCincorrect.main.BFs
 
 # MM
-table(D.2yo$test_choice[D.2yo$param_change=="MM"])
-MM.2yo.main = glm(test_choice~1, data=D.2yo,
-                  subset = D.2yo$param_change=="MM",
-                  family="binomial")
-summary(MM.2yo.main)
+table(D.MCincorrect$test_choice[D.MCincorrect$param_change=="MM"])
+MM.MCincorrect.main = binom.test(5,8,p=0.5)
+MM.MCincorrect.main
 
-MM.2yo.main.ORs = exp(coefficients(MM.2yo.main))
-MM.2yo.main.ORs
-
-MM.2yo.main.BFs = proportionBF(3,8,p=0.5)
-MM.2yo.main.BFs
+MM.MCincorrect.main.BFs = proportionBF(3,8,p=0.5)
+MM.MCincorrect.main.BFs
 
 
-## 3-YEAR-OLDS ##
+## MC_Correct ##
 
 # HUs 
-HUs.3yo = subset(D.3yo, ! param_change %in% c("MM", "WD"))
-HUs.3yo.TAB = table(HUs.3yo$test_choice)
-HUs.3yo.chi.square = chisq.test(HUs.3yo.TAB,
-                                correct = FALSE)
-HUs.3yo.chi.square
+table(D.MCcorrect$test_choice[D.MCcorrect$param_change=="HU"])
+HUs.MCcorrect.main = binom.test(8,8,p=0.5)
+HUs.MCcorrect.main
 
-HUs.3yo.main.BFs = proportionBF(8,8,p=0.5)
-HUs.3yo.main.BFs
+HUs.MCcorrect.main.BFs = proportionBF(8,8,p=0.5)
+HUs.MCcorrect.main.BFs
 
 
 # WD
-WD.3yo = subset(D.3yo, ! param_change %in% c("HU", "MM"))
-WD.3yo.TAB = table(WD.3yo$test_choice)
-WD.3yo.chi.square = chisq.test(WD.3yo.TAB,
-                                correct = FALSE)
-WD.3yo.chi.square
+table(D.MCcorrect$test_choice[D.MCcorrect$param_change=="WD"])
+WD.MCcorrect.main = binom.test(8,8,p=0.5)
+WD.MCcorrect.main
 
-WD.3yo.main.BFs = proportionBF(8,8,p=0.5)
-WD.3yo.main.BFs
+WD.MCcorrect.main.BFs = proportionBF(8,8,p=0.5)
+WD.MCcorrect.main.BFs
 
 # MM
-MM.3yo = subset(D.3yo, ! param_change %in% c("HU", "WD"))
-MM.3yo.TAB = table(MM.3yo$test_choice)
-MM.3yo.chi.square = chisq.test(MM.3yo.TAB,
-                               correct = FALSE)
-MM.3yo.chi.square
+table(D.MCcorrect$test_choice[D.MCcorrect$param_change=="MM"])
+MM.MCcorrect.main = binom.test(8,8,p=0.5)
+MM.MCcorrect.main
 
-MM.3yo.main.BFs = proportionBF(8,8,p=0.5)
-MM.3yo.main.BFs
+MM.MCcorrect.main.BFs = proportionBF(8,8,p=0.5)
+MM.MCcorrect.main.BFs
