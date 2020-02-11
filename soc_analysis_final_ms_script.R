@@ -263,219 +263,42 @@ null_bic = BIC(mem_check_age_null_model)
 BF10 = 1/exp((alt_bic - null_bic)/2)
 BF10
 
-# 2-year-old MC analysis #  
 
-# two-year-olds overall odds of passing memory check
-mem_check_two_year_olds = glm(memory_check~1, data = D.2yo, 
+
+
+##################################################
+# MAIN ANALYSES: COMPARING 2S TO 3S TEST CHOICES #
+#################################################
+# 3s vs 2s proportion of correct test choices
+test_choice_age_comp = glm(test_choice~age, data = D, 
                          family = "binomial",
                          na.action = na.omit)
-summary(mem_check_two_year_olds)
+summary(test_choice_age_comp)
 
 
-# 3-year-old MC analysis #  
+# 2- vs. 3-year-old TC comparisons #
+# ORs
+test_choice_age_comp_ORs = exp(coefficients(test_choice_age_comp))
+test_choice_age_comp_ORs
 
-# three-year-olds overall odds of passing memory check
-mem_check_three_year_olds = glm(memory_check~1, data = D.3yo, 
+# 95% CI
+mem_check_age_comp_boot = glm.global.boot_modified(x=9,y=2,D)
+mem_check_age_comp_boot
+
+# BF
+mem_check_age_alt_model_2 = glm(test_choice~age, data = D, 
                               family = "binomial",
                               na.action = na.omit)
-summary(mem_check_three_year_olds)
 
-
-# ORS 
-mem_check_threes_ORs = exp(coefficients(mem_check_three_year_olds))
-mem_check_threes_ORs
-
-# 95% CI
-mem_check_threes_boot = glm.global.boot(x=10,D.3yo)
-mem_check_threes_boot
-
-mem_check_threes_boot_2 = exp(confint(mem_check_three_year_olds, method="Wald"))
-mem_check_threes_boot_2
-
-# BF
-mem_check_threes_BF = proportionBF(30,32,p=0.5)
-mem_check_threes_BF
-
-
-#####################################
-# MAIN ANALYSES: COMPARING 2S TO 3S #
-#####################################
-# 3s vs 2s proportion of correct test choices
-table(D$test_choice[D$age_cat=="Younger"])
-table(D$test_choice[D$age_cat=="Older"])
-main_analysis_binom_test = binom.test(14,20, 
-                                      p = 0.5)
-main_analysis_binom_test
-
-# BF for 2s vs 3s of correct test choices
-proportionBF(14,20,p=0.5)
-
-
-# BF for correct MC vs Incorrect MC proportion of correct test choices
-proportionBF(17,20,p=0.5)
-
-main_analysis_comparison = glm(test_choice~age_cat,
-                               data=D, family="binomial",
+mem_check_age_null_model_2 = glm(test_choice~1, data = D, 
+                               family = "binomial",
                                na.action = na.omit)
-summary(main_analysis_comparison)
 
-# ORs 
-main_analysis_ORs = exp(coefficients(main_analysis_comparison))
-main_analysis_ORs
+alt_bic_2 = BIC(mem_check_age_alt_model_2)
+null_bic_2 = BIC(mem_check_age_null_model_2)
 
-
-# 95% CIs
-main_analysis_CIs = glm.global.boot_modified(9, 3, D)
-main_analysis_CIs
-
-# BF
-main_analysis_conting_tab = xtabs(~ age_cat + test_choice, data = D)
-main_analysis_conting_tab
-
-main_analysis_conting_BF = contingencyTableBF(main_analysis_conting_tab,
-                                           sampleType = "indepMulti",
-                                           fixedMargin = "cols")
-main_analysis_conting_BF
-
-
-#####################################
-# 2-year-old analyses: test choices #
-#####################################
-# main analysis
-main.glm.fit.2yo = glm(test_choice~1, data=D.2yo, family="binomial")
-summary(main.glm.fit.2yo)
-
-# ORs 
-main_analysis_twos_ORs = exp(coefficients(main.glm.fit.2yo))
-main_analysis_twos_ORs
-
-# 95% CI
-main_analysis_twos_boot = glm.global.boot(x=9,D.2yo)
-main_analysis_twos_boot
-
-# BF
-main_analysis_twos_BF = proportionBF(13,32,p=0.5)
-main_analysis_twos_BF
-
-
-# analysis for those who failed the memory check
-glm.fit.2yo.failed.mc = glm(test_choice~1, data=D.2yo, subset = D.2yo$memory_check=="Incorrect",
-                       family="binomial")
-summary(glm.fit.2yo.failed.mc)
-
-
-# analysis for those who passed the memory check
-glm.fit.2yo.passed.mc = glm(test_choice~1, data=D.2yo, subset = D.2yo$memory_check=="Correct",
-                            family="binomial")
-summary(glm.fit.2yo.passed.mc)
-
-#############################
-# 2-year-old omnibus figure #
-#############################
-
-# omnibus 2-yo figure
-p.2yo.tc = ggplot(D.2yo, aes(test_choice, fill = test_choice)) # THE FIRST ARGUMENT VALUES AFTER 'AES' CORRESPONDS
-p.2yo.tc+geom_bar() + theme_bw() + # remove the gray background
-  scale_fill_manual(values= c("#FF9999","black")) +
-  theme(panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) +
-  scale_y_continuous(expand = c(0, 0)) + # ensure that bars hit the x-axis
-  coord_cartesian(ylim=c(0, 20))
-
-
-
-
-#######################################################################
-############ SUMMARY '2-yo data-subsetted full model' #################
-#######################################################################
-# This analysis indicated that not only were 2-year-olds as likely to 
-# choose the correct test object as they were to choose the incorrect 
-# test object, they were also as likely to pass the memory check as
-# they were not to pass the memory check. 
-
-# In addition, although there was a marginally significant main effect
-# of sex, subsequent Bayes Factor analyses and bootstrapped CIs
-# indicate that this difference was not significant. Thus, this
-# main effect was not explored further. 
-
-# Finally, those who did pass the memory check were not more likely
-# to choose the correct test object than those who did not pass the 
-# memory check.
-########################################################################
-
-
-#######################
-# 3-year-old analyses #
-#######################
-# main analysis
-main.glm.fit.3yo = glm(test_choice ~ 1, data=D.3yo, 
-                               family = "binomial")
-summary(main.glm.fit.3yo)
-
-# ORs 
-main_analysis_threes_ORs = exp(coefficients(main.glm.fit.3yo))
-main_analysis_threes_ORs
-
-# 95% CI
-main_analysis_threes_boot = glm.global.boot(x=9,D.3yo)
-main_analysis_threes_boot
-
-# BF
-table(D.3yo$test_choice)
-main_analysis_threes_BF = proportionBF(23,32,p=0.5)
-main_analysis_threes_BF
-
-# analysis for those who failed the memory check
-glm.fit.3yo.failed.mc = glm(test_choice~1, data=D.3yo, subset = D.3yo$memory_check=="Incorrect",
-                            family="binomial")
-summary(glm.fit.3yo.failed.mc) # Note that this analysis doesn't make sense because only 1 child 
-                               # failed the memory check. 
-
-
-# analysis for those who passed the memory check
-glm.fit.3yo.passed.mc = glm(test_choice~1, data=D.3yo, subset = D.3yo$memory_check=="Correct",
-                            family="binomial")
-summary(glm.fit.3yo.passed.mc)
-
-# ORs 
-glm.fit.3yo.passed.mc.ORs = exp(coefficients(glm.fit.3yo.passed.mc))
-glm.fit.3yo.passed.mc.ORs
-
-# 95% CI
-D.3yo.correct.mc = subset(D.3yo, ! memory_check %in% c("Incorrect"))
-D.3yo.correct.mc.boot = glm.global.boot(x=9,D.3yo.correct.mc)
-D.3yo.correct.mc.boot
-
-# BF
-table(D.3yo.correct.mc$test_choice)
-D.3yo.correct.mc.BF = proportionBF(8,30,p=0.5)
-D.3yo.correct.mc.BF
-
-
-
-# omnibus 3-yo memory-check figure
-p.3yo.mc = ggplot(D.3yo, aes(memory_check)) # THE FIRST ARGUMENT VALUES AFTER 'AES' CORRESPONDS
-p.3yo.mc+geom_bar(fill=c("#FF9999","black")) + theme_bw() + # remove the gray background
-  theme(panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) +
-  scale_y_continuous(expand = c(0, 0)) + # ensure that bars hit the x-axis
-  coord_cartesian(ylim=c(0, 25))
-
-
-
-#######################################################################
-############ SUMMARY '3-yo data-subsetted full model' #################
-#######################################################################
-# The analyses indicates that, unlike the 2-year-olds, 3-year-olds were
-# both more likely to choose the correct test object and more likely to 
-# pass the memory check, which indicates that they encoded both the first-
-# and second-order relations between the objects, the features, and the 
-# machines' activation. 
-
-# Together, these results indicate a developmental progression in children's
-# ability to detect SOCs involving an objects' internal feature and its
-# causal efficacy. 
-########################################################################
+BF10_2 = 1/exp((alt_bic_2 - null_bic_2)/2)
+BF10_2
 
 
 
@@ -497,20 +320,12 @@ proportionBF(17,20,p=0.5)
 # failed MCers: test choices #
 #####################################
 # main analysis
-main.glm.fit.failed.mc = glm(test_choice~1, data=D.failed.mc, family="binomial")
-summary(main.glm.fit.failed.mc)
-
-# ORs 
-main.glm.fit.failed.mc_ORs = exp(coefficients(main.glm.fit.failed.mc))
-main.glm.fit.failed.mc_ORs
-
-# 95% CI
-main.glm.fit.failed.mc_boot = glm.global.boot(x=9, D.failed.mc)
-main.glm.fit.failed.mc_boot
+failed_mcers_binom_test = binom.test(10,17,p=0.5)
+failed_mcers_binom_test
 
 # BF
-main.glm.fit.failed.mc_BF = proportionBF(10,17,p=0.5)
-main.glm.fit.failed.mc_BF
+failed_mcers_binom_test_BF = proportionBF(10,17,p=0.5)
+failed_mcers_binom_test_BF
 
 
 
@@ -518,20 +333,9 @@ main.glm.fit.failed.mc_BF
 # Passed MCers: test choices #
 #####################################
 # main analysis
-main.glm.fit.passed.mc = glm(test_choice~1, data=D.passed.mc, family="binomial")
-summary(main.glm.fit.passed.mc)
-
-# ORs 
-main.glm.fit.passed.mc_ORs = exp(coefficients(main.glm.fit.passed.mc))
-main.glm.fit.passed.mc_ORs
-
-# 95% CI
-main.glm.fit.passed.mc_boot = glm.global.boot(x=9, D.passed.mc)
-main.glm.fit.passed.mc_boot
+passed_mcers_binom_test = binom.test(32,47,p=0.5)
+passed_mcers_binom_test
 
 # BF
-main.glm.fit.passed.mc_BF = proportionBF(32,47,p=0.5)
-main.glm.fit.passed.mc_BF
-
-
-
+passed_mcers_binom_test_BF = proportionBF(32,47,p=0.5)
+passed_mcers_binom_test_BF
