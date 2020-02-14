@@ -1,14 +1,16 @@
 Parameter value adjustment for older and younger networks
 
-# older
+# memory check passers
 
+# go from .08 to .06 learning rate
 # go from 15 to 13 hidden units
 # go from .001 to .0025 for weight decay
 # go from .9 to .875 for momentum
 
 
-# younger
+# memory check failers
 
+# go from .001 to .0008 learning rate
 # go from 13 to 11 hidden units
 # go from .005 to .008 for weight decay
 # go from .9 to .875 for momentum

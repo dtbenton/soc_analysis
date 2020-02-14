@@ -1,7 +1,0 @@
-###################################
-# NEURAL NETWORK CODING DECISIONS #
-###################################
-
-# Network's response will be coded as "1," which corresponds to correct performance, if the output activation of the "activity" unit is above .5 for the consistent event AND below .5 for the inconsistent event.
-
-# A random-number generator will be used to categorize younger network's test choices. This is because repeated simulations - in which the parameters that were chosen for younger networks - produced equal activation to the consistent and inconsistent test events.
