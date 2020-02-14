@@ -1,4 +1,4 @@
-Parameter value adjustment for older and younger networks
+Parameter value adjustment for memory check passer nets and memory check failer nets
 
 # memory check passers
 
