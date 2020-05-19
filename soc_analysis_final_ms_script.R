@@ -357,11 +357,11 @@ posthoc_chi_square
 posthoc_chi_square_BF = proportionBF(32,47,p=0.5)
 posthoc_chi_square_BF
 
-main_spearman_analysis_age_test = cor.test(D$test_choice,
+main_spearman_analysis_age_test = cor.test(as.numeric(D$test_choice),
                                            D$age,
                                            method="spearman",
                                            data=D)
-main_spearman_analysis_age_mem = cor.test(age,
-                                          memory_check,
+main_spearman_analysis_age_mem = cor.test(as.numeric(D$memory_check),
+                                          D$age,
                                           method="spearman",
                                           data=D)
