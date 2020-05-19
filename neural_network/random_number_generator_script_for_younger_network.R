@@ -7,7 +7,7 @@
 # and inconsistent test events, I used a random number generator to code
 # the younger network's test choices. Thus, a network was said to have
 # made a correct test choice if the random-number generator produced a '1'.
-# Otherwise, the network was said to ahve made an incorrect test choice and,
+# Otherwise, the network was said to have made an incorrect test choice and,
 # hence, assigned a '0'.
 
 set.seed(2245)
