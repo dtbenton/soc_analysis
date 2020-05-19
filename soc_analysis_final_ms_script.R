@@ -361,7 +361,10 @@ main_spearman_analysis_age_test = cor.test(as.numeric(D$test_choice),
                                            D$age,
                                            method="spearman",
                                            data=D)
+main_spearman_analysis_age_test
+
 main_spearman_analysis_age_mem = cor.test(as.numeric(D$memory_check),
                                           D$age,
                                           method="spearman",
                                           data=D)
+main_spearman_analysis_age_mem
