@@ -194,7 +194,7 @@ D.2$memory_check = revalue(x = as.factor(D.2$memory_check),
 # mc_status
 D.2$mc_status = revalue(x = as.factor(D.2$mc_status), 
                   c("0" = "MC_Consistent_Nets", "1"="MC_Inconsistent_Nets",
-                    "2" = "Twos", "3" = "Threes"))
+                    "2" = "MC_Consistent_Kids", "3" = "MC_Inconsistent_Nets"))
 
 # type
 D.2$type = revalue(x = as.factor(D.2$type), 

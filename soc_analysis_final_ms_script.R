@@ -124,8 +124,9 @@ table(D$test_choice)
 # get proportion (or odds) of success (i.e., 1/0+1), averaged 
 # across all predictors
 baseline_sucess_prob = table(D$test_choice)[[2]]/(table(D$test_choice)[[1]]+table(D$test_choice)[[2]])
+baseline_sucess_prob
 baseline_success_odds = baseline_sucess_prob/(1-baseline_sucess_prob) # this is what will be shown
-                                                                      # as the overall 'odds' for a
+baseline_success_odds                                                                      # as the overall 'odds' for a
                                                                       # a model in which all the 
                                                                       # predictors are set to '0'
                                                                       # more precisely, the log of the
@@ -339,3 +340,28 @@ passed_mcers_binom_test
 # BF
 passed_mcers_binom_test_BF = proportionBF(32,47,p=0.5)
 passed_mcers_binom_test_BF
+
+
+
+##############################################
+# Additional Analyses for Revised Submission #
+##############################################
+omnibus_chi_square_table = xtabs(~ memory_check + test_choice, data = D)
+omnibus_chi_square = chisq.test(omnibus_chi_square_table,correct = FALSE)
+omnibus_chi_square
+
+posthoc_chi_square_table = xtabs(~ memory_check + test_choice, data = D)[2,]
+posthoc_chi_square_table
+posthoc_chi_square = chisq.test(posthoc_chi_square_table, correct = FALSE)
+posthoc_chi_square
+posthoc_chi_square_BF = proportionBF(32,47,p=0.5)
+posthoc_chi_square_BF
+
+main_spearman_analysis_age_test = cor.test(D$test_choice,
+                                           D$age,
+                                           method="spearman",
+                                           data=D)
+main_spearman_analysis_age_mem = cor.test(age,
+                                          memory_check,
+                                          method="spearman",
+                                          data=D)
