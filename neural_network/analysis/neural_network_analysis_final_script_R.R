@@ -154,23 +154,25 @@ two_year_old_success_odds = two_year_old_success_prob/(1-two_year_old_success_pr
 #####################################
 # Passed MCers: test choices #
 #####################################
-main_analysis_passed_mc_binom_test = binom.test(20,20, 
+table(D$test_choice[D$mc_status=="MC_Consistent"])
+main_analysis_passed_mc_binom_test = binom.test(32,32, 
                                          p = 0.5)
 main_analysis_passed_mc_binom_test
 
 
-main_analysis_passed_mc_BF = proportionBF(20,20,p=0.5)
+main_analysis_passed_mc_BF = proportionBF(32,32,p=0.5)
 main_analysis_passed_mc_BF
 
 #####################################
 # failed MCers: test choices #
 #####################################
-main_analysis_failed_mc_binom_test = binom.test(9,20, 
+table(D$test_choice[D$mc_status=="MC_Inconsistent"])
+main_analysis_failed_mc_binom_test = binom.test(16,32, 
                                                 p = 0.5)
 main_analysis_failed_mc_binom_test
 
 
-main_analysis_failed_mc_BF = proportionBF(9,20,p=0.5)
+main_analysis_failed_mc_BF = proportionBF(16,32,p=0.5)
 main_analysis_failed_mc_BF
 
 
@@ -218,7 +220,7 @@ main_passed_threes_nets_kids_chisq_test = chisq.test(xtabs(~test_choice+type,dat
 main_passed_threes_nets_kids_chisq_test
 
 # BF
-main_passed_threes_nets_kids_BF = proportionBF(20,52,p=0.5)
+main_passed_threes_nets_kids_BF = proportionBF(32,79,p=0.5)
 main_passed_threes_nets_kids_BF
 
 
@@ -231,5 +233,5 @@ main_failed_threes_nets_kids_chisq_test = chisq.test(xtabs(~test_choice+type,dat
 main_failed_threes_nets_kids_chisq_test
 
 # BF
-main_failed_threes_nets_kids_BF = proportionBF(9,19,p=0.5)
+main_failed_threes_nets_kids_BF = proportionBF(16,26,p=0.5)
 main_failed_threes_nets_kids_BF

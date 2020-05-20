@@ -14,3 +14,8 @@ set.seed(2245)
 rand_younger_net = sample(c(0,1),20, replace = TRUE)
 rand_younger_net
 table(rand_younger_net)
+
+# additional nets
+rand_younger_net_additional = sample(c(0,1),12, replace = TRUE)
+rand_younger_net_additional
+table(rand_younger_net_additional)
